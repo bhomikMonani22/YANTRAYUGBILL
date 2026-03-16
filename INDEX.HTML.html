@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Yantrayug Billing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>:root{
+  --f:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;
+  --m:ui-monospace,"SF Mono","Menlo",monospace;
+  --bg:#FAFAF7;--sf:#FFFFFF;
+  --t1:#1A1A1A;--t2:#444444;--t3:#888888;--t4:#BBBBBB;--t5:#E8E8E8;
+  --bl:#C49E00;--by:#F5C800;--b1:rgba(245,200,0,.10);--b2:rgba(245,200,0,.22);
+  --gn:#34C759;--am:#FF9F0A;--rd:#FF3B30;
+  --ok-b:rgba(52,199,89,.12);--ok-f:#166534;
+  --lo-b:rgba(255,159,10,.12);--lo-f:#92400E;
+  --no-b:rgba(255,59,48,.10);--no-f:#991B1B;
+  --sep:#E8E8E8;--sp2:#F0F0EE;
+  --gl:#FFFFFF;--gb:none;
+  --r:8px;--rl:12px;--pill:999px;
+  --rh:44px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--t1);
+  font-family:var(--f);font-size:13px;line-height:1.4;
+  -webkit-font-smoothing:antialiased;overflow:hidden}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--t4);border-radius:2px}
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* NAV */
+#nav{flex-shrink:0;height:44px;display:flex;align-items:center;gap:0;
+  background:#FFFFFF;
+  border-bottom:1.5px solid var(--sep);z-index:400;padding:0 14px}
+.nb{font-size:15px;font-weight:800;letter-spacing:-.4px;color:#1A1A1A;flex-shrink:0;
+  padding-right:14px;border-right:1.5px solid var(--sep)}
+.tabs{display:flex;height:100%;flex:1;overflow-x:auto;padding:0 3px}
+.tabs::-webkit-scrollbar{height:0}
+.tab{display:flex;align-items:center;gap:5px;padding:0 13px;
+  font-size:12.5px;font-weight:500;color:var(--t3);
+  background:none;border:none;border-bottom:2.5px solid transparent;
+  cursor:pointer;color:#888888;transition:color .12s,border-color .12s;white-space:nowrap;flex-shrink:0}
+.tab.on{color:#1A1A1A;font-weight:700;border-color:var(--by)}
+.tab svg{opacity:.5}.tab.on svg{opacity:1}
+.tbdg{background:var(--by);color:#1A1A1A;font-size:9px;font-weight:700;
+  border-radius:var(--pill);padding:1px 5px;display:none;
+  margin-left:2px;font-variant-numeric:tabular-nums}
+.panel{display:none;flex:1;overflow:hidden}.panel.on{display:flex}
+
+/* ═══ BILLING ═══ */
+#pb{flex-direction:row}
+#pl{display:flex;flex-direction:column;flex:1;overflow:hidden;
+  background:var(--sf);border-right:1px solid var(--sep);min-width:0}
+#sh{flex-shrink:0;padding:7px 12px 5px;
+  background:#FFFFFF;
+  border-bottom:1px solid var(--sep)}
+.pr{display:flex;align-items:center;gap:7px;margin-bottom:5px;position:relative}
+.plbl{font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--t3);white-space:nowrap}
+.pw{flex:1;position:relative}
+#pi{width:100%;background:var(--bg);border:1.5px solid var(--sep);
+  border-radius:var(--r);padding:5px 9px;font-family:var(--f);font-size:13px;
+  font-weight:500;color:var(--t1);outline:none;transition:border-color .12s}
+#pi:focus{border-color:var(--by);box-shadow:0 0 0 3px var(--b1)}
+#pi::placeholder{color:var(--t4)}
+#pd{display:none;position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:600;
+  background:var(--sf);border:1px solid var(--sep);border-radius:var(--rl);
+  box-shadow:0 8px 28px rgba(0,0,0,.12);max-height:180px;overflow-y:auto}
+#pd.on{display:block}
+.po{padding:8px 12px;font-size:13px;cursor:pointer;display:flex;
+  justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--sp2)}
+.po:last-child{border-bottom:none}.po:hover{background:var(--bg)}
+.pos{font-size:10px;color:var(--t3)}
+.pnw{padding:8px 12px;font-size:13px;font-weight:600;color:var(--bl);
+  cursor:pointer;border-top:1px solid var(--sep);
+  display:none;align-items:center;gap:6px}
+.pnw:hover{background:var(--b1)}
+.sw{position:relative}
+#si{width:100%;height:34px;padding:0 54px 0 30px;
+  background:var(--bg);border:1.5px solid var(--sep);border-radius:var(--r);
+  font-family:var(--f);font-size:14px;color:var(--t1);outline:none;
+  transition:border-color .12s,box-shadow .12s}
+#si:focus{border-color:var(--by);box-shadow:0 0 0 3px var(--b1);background:var(--sf)}
+#si::placeholder{color:var(--t4)}
+.sico{position:absolute;left:9px;top:50%;transform:translateY(-50%);
+  font-size:14px;color:var(--t3);pointer-events:none}
+#si:focus~.sico{color:var(--by)}
+.scnt{position:absolute;right:9px;top:50%;transform:translateY(-50%);
+  font-size:10px;font-weight:600;color:var(--t3);pointer-events:none;
+  font-variant-numeric:tabular-nums}
+.khr{display:flex;gap:9px;margin-top:4px;overflow:hidden}
+.ki{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--t4)}
+kbd{background:var(--bg);border:1px solid var(--sep);border-bottom:2px solid rgba(0,0,0,.08);
+  border-radius:4px;padding:0 4px;font-size:9px;font-weight:600;
+  color:var(--t2);line-height:1.8}
+
+/* result header — exact same grid as rows */
+#rh{flex-shrink:0;display:grid;
+  grid-template-columns:118px 1fr 118px 52px 68px;
+  align-items:center;gap:0 6px;padding:0 14px;height:24px;
+  background:var(--bg);border-bottom:1.5px solid var(--sep)}
+.rhc{font-size:8.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--t3)}
+.rhc.r{text-align:right}.rhc.c{text-align:center}
+#rm{flex-shrink:0;padding:1px 12px;min-height:18px;display:flex;
+  justify-content:space-between;align-items:center;
+  background:var(--bg);border-bottom:1px solid var(--sp2)}
+.rml{font-size:10px;color:var(--t3);font-variant-numeric:tabular-nums}
+#rl{flex:1;overflow-y:auto;background:var(--sf)}
+#re{display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:48px 20px;text-align:center;color:var(--t3)}
+.re-i{font-size:30px;opacity:.12;margin-bottom:9px}
+.re-h{font-size:15px;font-weight:600;color:var(--t2);margin-bottom:3px}
+.re-s{font-size:11.5px;line-height:1.6}
+
+/* ── RESULT ROW ──
+   40px height. Exactly 10 rows visible on a 768px screen.
+   ONE name (b_parts_name). No secondary description. No double text.
+   Red left strip = out of stock (still addable for orders).
+────────────────── */
+.rr{display:grid;
+  grid-template-columns:118px 1fr 118px 52px 68px;
+  align-items:center;height:var(--rh);padding:0 14px;
+  border-bottom:1px solid var(--sp2);cursor:pointer;
+  user-select:none;gap:0 6px;transition:background .08s}
+.rr:hover{background:var(--b1)}
+.rr.sel{background:var(--b1);border-left:3px solid var(--by);padding-left:11px}
+.rr.ns{border-left:2.5px solid var(--rd)}
+.rr-pn{font-family:var(--m);font-size:10.5px;font-weight:700;color:var(--bl);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rr-nm{font-size:13px;font-weight:600;color:var(--t1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rr-vh{font-size:10.5px;color:var(--t3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rr-st{text-align:center}
+.rr-mr{font-size:12.5px;font-weight:600;color:var(--t1);
+  font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.chip{display:inline-block;font-size:9px;font-weight:700;
+  border-radius:4px;padding:1px 5px;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.ck{background:var(--ok-b);color:var(--ok-f)}
+.cl{background:var(--lo-b);color:var(--lo-f)}
+.cn{background:var(--no-b);color:var(--no-f)}
+.cnc{background:rgba(0,0,0,.06);color:var(--t3);
+  font-size:8px;text-transform:uppercase}
+
+/* ═══ CART ═══ */
+#pc{display:flex;flex-direction:column;width:330px;flex-shrink:0;
+  background:var(--bg);overflow:hidden}
+#ch{flex-shrink:0;padding:9px 13px 7px;background:var(--sf);
+  border-bottom:1px solid var(--sep)}
+.ce{font-size:9.5px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--t3);display:flex;
+  justify-content:space-between;margin-bottom:2px}
+.cp{font-size:16px;font-weight:700;letter-spacing:-.3px}
+.cp-e{font-size:13px;color:var(--t4)}
+#cr{flex:1;overflow-y:auto}
+#ce2{padding:32px 13px;text-align:center;color:var(--t3);
+  font-size:12px;line-height:1.7}
+.ci{display:flex;align-items:flex-start;gap:7px;padding:8px 13px;
+  border-bottom:1px solid var(--sp2);background:var(--sf)}
+.ci:hover{background:var(--bg)}
+.cib{flex:1;min-width:0}
+.ci-pn{font-family:var(--m);font-size:9.5px;font-weight:700;
+  color:var(--bl);margin-bottom:1px}
+.ci-nm{font-size:12px;font-weight:600;color:var(--t1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.ci-sb{display:flex;gap:4px;align-items:center;
+  font-size:10.5px;color:var(--t3)}
+.ci-q{background:var(--bg);border-radius:4px;
+  padding:0 5px;font-weight:600;color:var(--t2)}
+.cia{font-size:12.5px;font-weight:700;color:var(--t1);
+  font-variant-numeric:tabular-nums;flex-shrink:0;margin-top:1px}
+.db{background:none;border:none;cursor:pointer;color:var(--t4);
+  font-size:11px;width:17px;height:17px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .12s,transform .14s cubic-bezier(.16,1,.3,1);margin-top:2px}
+.db:hover{color:var(--rd);transform:scale(1.2)}
+#cf{flex-shrink:0;background:var(--sf);border-top:1px solid var(--sep)}
+#ct{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 13px;border-bottom:1px solid var(--sep)}
+.ctl{font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--t3)}
+#ctv{font-size:20px;font-weight:800;letter-spacing:-.3px;
+  color:var(--by);font-variant-numeric:tabular-nums}
+#ca{padding:9px 13px 12px}
+.bpr{display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;background:var(--by);border:none;border-radius:var(--r);
+  font-family:var(--f);font-size:13px;font-weight:700;color:#1A1A1A;
+  padding:9px;cursor:pointer;margin-bottom:7px;
+  box-shadow:0 2px 10px rgba(245,200,0,.35);
+  transition:opacity .12s,transform .14s cubic-bezier(.16,1,.3,1)}
+.bpr:hover{opacity:.88}.bpr:active{transform:scale(.98)}
+.brw{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.bsc{background:var(--sf);border:1.5px solid var(--sep);border-radius:var(--r);
+  font-family:var(--f);font-size:12px;font-weight:500;color:var(--t2);
+  padding:7px;cursor:pointer;text-align:center;
+  transition:color .12s,border-color .12s}
+.bsc:hover{color:#1A1A1A;border-color:var(--by);background:var(--b1)}
+.bcl{display:block;width:100%;background:none;border:none;font-family:var(--f);
+  font-size:11px;color:var(--t4);cursor:pointer;padding:4px;
+  text-align:center;transition:color .12s}.bcl:hover{color:var(--rd)}
+
+/* ═══ PICK LIST ═══ */
+#pp{flex-direction:column;background:var(--sf)}
+#pkb{flex-shrink:0;padding:8px 16px;display:flex;align-items:center;gap:10px;
+  background:var(--gl);backdrop-filter:var(--gb);-webkit-backdrop-filter:var(--gb);
+  border-bottom:1px solid var(--sep)}
+.pkt{font-size:14px;font-weight:700;letter-spacing:-.3px}
+.pkpl{background:var(--b1);color:var(--bl);font-size:11px;font-weight:600;
+  border-radius:var(--pill);padding:3px 10px}
+.bbk{background:none;border:1.5px solid var(--sep);border-radius:var(--r);
+  font-family:var(--f);font-size:12px;font-weight:500;color:var(--t2);
+  padding:5px 11px;cursor:pointer;display:flex;align-items:center;gap:5px;
+  transition:color .12s}.bbk:hover{color:var(--bl)}
+.bprt{margin-left:auto;background:var(--bl);border:none;border-radius:var(--r);
+  font-family:var(--f);font-size:12px;font-weight:600;color:#fff;
+  padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:5px;
+  box-shadow:0 2px 8px rgba(0,122,255,.22);transition:opacity .12s}
+.bprt:hover{opacity:.88}
+#pks{flex:1;overflow-y:auto;padding:12px 16px}
+#pkt2{width:100%;border-collapse:collapse;font-size:12.5px}
+#pkt2 thead th{padding:5px 8px;text-align:left;font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.4px;color:var(--t3);
+  background:var(--bg);border-bottom:1.5px solid var(--sep);
+  position:sticky;top:0;z-index:10}
+#pkt2 tbody tr{border-bottom:1px solid var(--sp2)}
+#pkt2 tbody tr:hover{background:var(--bg)}
+#pkt2 td{padding:7px 8px;vertical-align:middle}
+.ptb{font-family:var(--m);font-size:10px;font-weight:700;color:var(--bl);
+  background:var(--b1);padding:2px 5px;border-radius:4px;white-space:nowrap}
+.ptp{font-family:var(--m);font-size:10px;font-weight:600;color:var(--t2)}
+.ptn{font-size:13px;font-weight:600}
+.edt{background:var(--bg);border:1.5px solid var(--sep);border-radius:var(--r);
+  font-family:var(--f);font-size:12.5px;font-weight:600;color:var(--t1);
+  padding:4px 7px;outline:none;font-variant-numeric:tabular-nums;
+  text-align:right;transition:border-color .12s;
+  -moz-appearance:textfield;width:62px}
+.edt::-webkit-inner-spin-button,.edt::-webkit-outer-spin-button{-webkit-appearance:none}
+.edt:focus{border-color:var(--bl);box-shadow:0 0 0 2px var(--b1)}
+.ptam{font-size:12.5px;font-weight:700;text-align:right;
+  font-variant-numeric:tabular-nums}
+#pkf{flex-shrink:0;padding:9px 16px;border-top:1.5px solid var(--sep);
+  display:flex;align-items:center;gap:10px;background:var(--sf)}
+.pfl{font-size:9.5px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--t3)}
+.pfv{font-size:19px;font-weight:700;letter-spacing:-.3px;
+  font-variant-numeric:tabular-nums}
+#pfe{display:flex;gap:6px;margin-left:auto}
+
+/* ═══ SYNC ═══ */
+#psync{flex-direction:column;background:var(--bg);overflow-y:auto;padding:16px}
+.syp{max-width:820px;margin:0 auto;width:100%}
+.sy-g{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.syc{background:var(--sf);border-radius:var(--rl);
+  border:1px solid var(--sep);padding:15px}
+.sy-f{grid-column:1/-1}
+.sct{font-size:14px;font-weight:700;margin-bottom:3px}
+.scs{font-size:11.5px;color:var(--t3);margin-bottom:11px;line-height:1.55}
+.dz{border:2px dashed var(--sep);border-radius:var(--r);
+  padding:18px 12px;text-align:center;cursor:pointer;
+  position:relative;transition:border-color .12s,background .12s}
+.dz:hover,.dz.ov{border-color:var(--by);background:var(--b1)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;
+  width:100%;height:100%}
+.dzi{font-size:20px;opacity:.28;margin-bottom:4px}
+.dzt{font-size:13px;font-weight:600;margin-bottom:2px}
+.dzs{font-size:11px;color:var(--t3)}
+.slg{background:var(--bg);border-radius:var(--r);border:1px solid var(--sep);
+  padding:6px 9px;font-family:var(--m);font-size:10px;color:var(--t3);
+  line-height:1.7;max-height:88px;overflow-y:auto;margin-top:7px}
+.lg{color:#1D8538}.le{color:var(--rd)}.lh{color:var(--bl)}
+.prog{width:100%;height:3px;background:var(--sep);border-radius:2px;
+  overflow:hidden;margin-top:5px;display:none}
+.pgf{height:100%;background:var(--by);border-radius:2px;
+  width:0;transition:width .3s}
+.stpl{display:inline-flex;align-items:center;gap:5px;font-size:11px;
+  font-weight:500;padding:3px 10px;border-radius:var(--pill)}
+.sp-ok{background:var(--ok-b);color:var(--ok-f)}
+.sp-er{background:var(--no-b);color:var(--no-f)}
+.sp-id{background:rgba(0,0,0,.05);color:var(--t3)}
+.spd{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.sp-ok .spd{background:var(--ok-f)}
+.sp-er .spd{background:var(--no-f)}
+.sp-id .spd{background:var(--t4)}
+.fi{flex:1;background:var(--bg);border:1.5px solid var(--sep);
+  border-radius:var(--r);font-family:var(--f);font-size:13px;
+  color:var(--t1);padding:6px 9px;outline:none;
+  transition:border-color .12s}
+.fi:focus{border-color:var(--by);box-shadow:0 0 0 2px var(--b1)}
+.fi::placeholder{color:var(--t4)}
+.bsm{background:var(--by);border:none;border-radius:var(--r);
+  font-family:var(--f);font-size:12.5px;font-weight:700;color:#1A1A1A;
+  padding:6px 13px;cursor:pointer;white-space:nowrap;
+  transition:opacity .12s}
+.bsm:hover{opacity:.88}
+.pmr{display:flex;gap:7px;margin-bottom:9px}
+.pli{border:1px solid var(--sep);border-radius:var(--r);
+  max-height:170px;overflow-y:auto}
+.plr{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 11px;border-bottom:1px solid var(--sp2);font-size:12.5px}
+.plr:last-child{border-bottom:none}
+.pld{background:none;border:none;cursor:pointer;color:var(--t4);
+  font-size:11px;padding:2px 4px;transition:color .12s}
+.pld:hover{color:var(--rd)}
+
+/* ═══ SLANGS ═══ */
+#pg{flex-direction:column;background:var(--bg);overflow-y:auto;padding:16px}
+.sgp{max-width:680px;margin:0 auto;width:100%}
+.sgc{background:var(--sf);border-radius:var(--rl);
+  border:1px solid var(--sep);padding:16px;margin-bottom:12px}
+.sgt{font-size:14px;font-weight:700;margin-bottom:3px}
+.sgs{font-size:11.5px;color:var(--t3);margin-bottom:11px;line-height:1.6}
+.sgr{display:flex;gap:7px;margin-bottom:7px}
+.sgpn{width:148px;background:var(--bg);border:1.5px solid var(--sep);
+  border-radius:var(--r);font-family:var(--m);font-size:13px;
+  font-weight:600;color:var(--t1);padding:6px 9px;outline:none;
+  transition:border-color .12s;text-transform:uppercase}
+.sgpn:focus{border-color:var(--by);box-shadow:0 0 0 2px var(--b1)}
+.sgnm{flex:1;background:var(--bg);border:1.5px solid var(--sep);
+  border-radius:var(--r);font-family:var(--f);font-size:13px;
+  color:var(--t1);padding:6px 9px;outline:none;
+  transition:border-color .12s}
+.sgnm:focus{border-color:var(--by);box-shadow:0 0 0 2px var(--b1)}
+.sgh{background:var(--bg);border:1px solid var(--sep);
+  border-radius:var(--r);padding:5px 9px;font-size:11.5px;
+  color:var(--t2);margin-top:4px;min-height:24px;display:none}
+.sgh.on{display:block}
+.sgl{background:var(--sf);border-radius:var(--rl);
+  border:1px solid var(--sep);overflow:hidden}
+.sglr{display:grid;grid-template-columns:140px 1fr 1fr 22px;
+  align-items:center;gap:7px;padding:7px 11px;
+  border-bottom:1px solid var(--sp2);font-size:12px}
+.sglr:last-child{border-bottom:none}
+.sglpn{font-family:var(--m);font-size:10.5px;font-weight:700;color:var(--bl)}
+.sglo{color:var(--t3)}
+.sgd{background:none;border:none;cursor:pointer;color:var(--t4);
+  transition:color .12s}.sgd:hover{color:var(--rd)}
+
+/* ═══ QTY SHEET ═══ */
+#ov{display:none;position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,.3);backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  align-items:flex-end;justify-content:center}
+#ov.on{display:flex;animation:fdi .17s ease both}
+@keyframes fdi{from{opacity:0}to{opacity:1}}
+#sht{width:100%;max-width:620px;background:var(--sf);
+  border-radius:20px 20px 0 0;padding:7px 24px 32px;
+  box-shadow:0 -14px 50px rgba(0,0,0,.14);
+  animation:shu .35s cubic-bezier(.32,.72,0,1) both;
+  will-change:transform,opacity}
+@keyframes shu{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+.shd{width:32px;height:4px;background:var(--sep);
+  border-radius:2px;margin:0 auto 14px}
+.sh-pn{font-family:var(--m);font-size:10.5px;font-weight:700;
+  color:var(--bl);margin-bottom:3px}
+.sh-nm{font-size:19px;font-weight:700;letter-spacing:-.4px;
+  margin-bottom:9px;line-height:1.2}
+.sh-ps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.sh-p{display:flex;align-items:center;gap:5px;background:var(--bg);
+  border:1px solid var(--sep);border-radius:var(--pill);
+  padding:3px 10px;font-size:11.5px;font-weight:500;color:var(--t2);
+  font-variant-numeric:tabular-nums}
+.sh-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sh-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+.sh-gl{font-size:9.5px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--t3);margin-bottom:4px}
+.sh-n{width:100%;background:var(--bg);border:1.5px solid var(--sep);
+  border-radius:var(--r);font-family:var(--f);font-size:25px;
+  font-weight:700;letter-spacing:-.5px;color:var(--t1);
+  padding:9px 11px;outline:none;font-variant-numeric:tabular-nums;
+  transition:border-color .12s;-moz-appearance:textfield}
+.sh-n::-webkit-inner-spin-button,.sh-n::-webkit-outer-spin-button{-webkit-appearance:none}
+.sh-n:focus{border-color:var(--by);box-shadow:0 0 0 3px var(--b1)}
+.sh-w{font-size:10.5px;font-weight:500;display:none;margin-top:-2px}
+.wmrp{color:var(--am)}.wcst{color:var(--rd)}
+.sh-bt{display:grid;grid-template-columns:auto 1fr;gap:7px}
+.sh-ca{background:var(--bg);border:1.5px solid var(--sep);
+  border-radius:var(--r);font-family:var(--f);font-size:14px;
+  font-weight:500;color:var(--t2);padding:10px 15px;cursor:pointer;
+  white-space:nowrap;transition:opacity .12s}
+.sh-ca:hover{opacity:.7}
+.sh-co{background:var(--by);border:none;border-radius:var(--r);
+  font-family:var(--f);font-size:14px;font-weight:700;color:#1A1A1A;
+  padding:10px;cursor:pointer;
+  box-shadow:0 3px 10px rgba(245,200,0,.35);
+  transition:opacity .12s,transform .12s}
+.sh-co:hover{opacity:.88}.sh-co:active{transform:scale(.98)}
+
+
+/* ═══ UNSAVED DOT (replaces layout-shifting banner) ═══ */
+/* Zero layout impact — absolutely positioned, invisible when clean */
+#unsaved-dot{
+  display:none;               /* hidden by default                  */
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--am);       /* amber — "needs attention" not error */
+  margin-left:5px;
+  vertical-align:middle;
+  flex-shrink:0;
+  box-shadow:0 0 0 2px var(--sf);  /* white ring so it pops on any bg  */
+  animation:pulse-dot 1.8s ease-in-out infinite;
+}
+#unsaved-dot.on{display:inline-block}
+@keyframes pulse-dot{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.55;transform:scale(.82)}
+}
+
+/* ═══ PICK LIST ENHANCED ═══ */
+.pk-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;
+  font-weight:700;padding:2px 8px;border-radius:var(--pill);cursor:pointer;
+  border:none;font-family:var(--f);transition:opacity .12s}
+.pk-status:hover{opacity:.75}
+.ps-found{background:var(--ok-b);color:var(--ok-f)}
+.ps-miss{background:var(--no-b);color:var(--no-f)}
+.ps-part{background:var(--lo-b);color:var(--lo-f)}
+#pk-confirm-bar{flex-shrink:0;padding:9px 16px;border-top:2px solid var(--sep);
+  display:flex;align-items:center;gap:9px;background:var(--sf)}
+#pk-ord-status{font-size:11.5px;color:var(--t3)}
+.bconf{background:var(--gn);border:none;border-radius:var(--r);font-family:var(--f);
+  font-size:13px;font-weight:600;color:#fff;padding:8px 18px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;margin-left:auto;
+  box-shadow:0 2px 8px rgba(52,199,89,.28);transition:opacity .12s,transform .12s}
+.bconf:hover{opacity:.88}.bconf:active{transform:scale(.98)}
+.bconf:disabled{background:var(--t4);box-shadow:none;cursor:default}
+.miss-row{opacity:.45}
+.miss-row .rr-nm{text-decoration:line-through}
+td.miss-cell{opacity:.45}
+
+/* ═══ ORDERS HISTORY TAB ═══ */
+#pord{flex-direction:column;background:var(--bg);overflow-y:auto;padding:16px}
+.ordp{max-width:900px;margin:0 auto;width:100%}
+.ord-card{background:var(--sf);border-radius:var(--rl);
+  border:1px solid var(--sep);padding:13px 16px;margin-bottom:10px;
+  cursor:pointer;transition:border-color .12s}
+.ord-card:hover{border-color:var(--by);background:var(--b1)}
+.ord-hd{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.ord-no{font-family:var(--m);font-size:11px;font-weight:700;color:#1A1A1A;
+  background:var(--by);padding:2px 7px;border-radius:4px}
+.ord-pty{font-size:13px;font-weight:700}
+.ord-dt{font-size:10.5px;color:var(--t3);margin-left:auto}
+.ord-st{font-size:10px;font-weight:700;padding:2px 8px;border-radius:var(--pill)}
+.ost-pending{background:var(--lo-b);color:var(--lo-f)}
+.ost-confirmed{background:var(--ok-b);color:var(--ok-f)}
+.ost-partial{background:var(--b1);color:var(--bl)}
+.ord-meta{font-size:11px;color:var(--t3);display:flex;gap:12px}
+.ord-exp{border-top:1px solid var(--sp2);margin-top:9px;padding-top:9px;
+  display:none}
+.ord-card.open .ord-exp{display:block}
+.ord-tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.ord-tbl th{font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.4px;color:var(--t3);padding:4px 6px;
+  border-bottom:1px solid var(--sep);text-align:left}
+.ord-tbl td{padding:5px 6px;border-bottom:1px solid var(--sp2)}
+.ord-tbl tr.miss-row td{opacity:.4}
+.exp-acts{display:flex;gap:6px;margin-top:9px;justify-content:flex-end}
+.bsm2{background:var(--b1);border:none;border-radius:var(--r);
+  font-family:var(--f);font-size:11.5px;font-weight:600;color:var(--bl);
+  padding:5px 12px;cursor:pointer;transition:opacity .12s,background .12s}
+.bsm2:hover{background:var(--by);color:#1A1A1A}
+.bsm2-del{background:var(--no-b);color:var(--no-f);border:1px solid rgba(153,27,27,.2)}
+.bsm2-del:hover{background:var(--rd);color:#fff;border-color:var(--rd)}
+.bsm2:hover{opacity:.75}
+
+/* ═══ LOADING ═══ */
+#ld{position:fixed;inset:0;background:var(--sf);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ld-i{font-size:42px;margin-bottom:13px;opacity:.7}
+.ld-t{font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:3px}
+.ld-s{font-size:13px;color:var(--t3);margin-bottom:22px}
+.ld-b{width:160px;height:3px;background:rgba(0,0,0,.07);
+  border-radius:2px;overflow:hidden;margin-bottom:8px}
+#ldf{height:100%;background:var(--by);width:0;border-radius:2px;
+  transition:width .4s cubic-bezier(.4,0,.2,1)}
+#ldm{font-size:10.5px;color:var(--t4);text-align:center;
+  max-width:240px;line-height:1.5}
+#ldr{display:none;margin-top:13px;background:var(--by);border:none;
+  border-radius:var(--r);font-family:var(--f);font-size:12.5px;
+  font-weight:700;color:#1A1A1A;padding:8px 18px;cursor:pointer}
+
+/* ═══ TOAST ═══ */
+#toast{position:fixed;bottom:20px;left:50%;z-index:9500;
+  transform:translateX(-50%) translateY(12px);opacity:0;
+  pointer-events:none;white-space:nowrap;will-change:transform,opacity;
+  background:rgba(29,29,31,.92);backdrop-filter:var(--gb);
+  -webkit-backdrop-filter:var(--gb);color:#fff;font-size:12.5px;
+  font-weight:500;padding:7px 18px;border-radius:var(--pill);
+  box-shadow:0 6px 20px rgba(0,0,0,.16);
+  transition:transform .34s cubic-bezier(.32,.72,0,1),opacity .2s}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ═══ MODAL ═══ */
+.mb{display:none;position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,.32);backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  align-items:center;justify-content:center}
+.mb.on{display:flex;animation:fdi .17s ease both}
+.mbox{background:var(--sf);border-radius:15px;padding:21px 24px;
+  max-width:380px;width:90%;
+  box-shadow:0 18px 56px rgba(0,0,0,.15);
+  animation:shu .26s cubic-bezier(.32,.72,0,1) both}
+.mt{font-size:15px;font-weight:700;margin-bottom:3px}
+.ms{font-size:11.5px;color:var(--t3);margin-bottom:11px;line-height:1.5}
+.mi{width:100%;background:var(--bg);border:1.5px solid var(--sep);
+  border-radius:var(--r);font-family:var(--f);font-size:14px;
+  color:var(--t1);padding:8px 11px;outline:none;margin-bottom:10px;
+  transition:border-color .12s}
+.mi:focus{border-color:var(--by);box-shadow:0 0 0 3px var(--b1)}
+.mr2{display:flex;gap:7px;justify-content:flex-end}
+.mca{background:none;border:none;font-family:var(--f);font-size:13px;
+  color:var(--t3);cursor:pointer;padding:6px 11px;border-radius:var(--r);
+  transition:color .12s}.mca:hover{color:var(--t1)}
+.mok{background:var(--by);border:none;border-radius:var(--r);
+  font-family:var(--f);font-size:13px;font-weight:700;color:#1A1A1A;
+  padding:6px 15px;cursor:pointer;transition:opacity .12s}
+.mok:hover{opacity:.88}
+
+/* ═══ MOBILE ═══ */
+@media(max-width:700px){
+  #pb{flex-direction:column}
+  #pl{flex:none;height:58vh;border-right:none;border-bottom:1px solid var(--sep)}
+  #pc{width:100%;height:42vh}
+  #rh{grid-template-columns:96px 1fr 0 50px 62px}
+  .rr{grid-template-columns:96px 1fr 0 50px 62px}
+  .rr-vh{display:none}
+  .nb{font-size:13px;padding-right:10px}
+  .tab{padding:0 9px;font-size:11.5px}
+  .khr{display:none}
+  .sy-g{grid-template-columns:1fr}
+}
+@media(max-width:420px){
+  #rh{display:none}
+  .rr{grid-template-columns:88px 1fr 46px 58px;gap:0 5px}
+  .rr-vh{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="ld">
+  <div class="ld-i">⚙️</div>
+  <div class="ld-t">Yantrayug</div>
+  <div class="ld-s">Hero Hub · Billing System</div>
+  <div class="ld-b"><div id="ldf"></div></div>
+  <div id="ldm">Connecting…</div>
+  <button id="ldr" onclick="boot()">Retry</button>
+</div>
+
+<div id="app" style="display:none">
+
+<!-- NAV -->
+<div id="nav">
+  <div class="nb">Yantrayug</div>
+  <div class="tabs">
+    <button class="tab on" id="tbilling" onclick="go('billing')">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M9 9h6M9 12h6M9 15h4"/>
+      </svg>Billing
+    </button>
+    <button class="tab" id="tpick" onclick="go('pick')">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>Pick List <span class="tbdg" id="pkbdg"></span>
+    </button>
+    <button class="tab" id="tsync" onclick="go('sync')">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 4v5h.582m15.356 2A8 8 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8 8 0 01-15.357-2m15.357 2H15"/>
+      </svg>Sync
+    </button>
+    <button class="tab" id="tord" onclick="go('ord')">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M12 12h.01M12 16h.01M8 12h.01M8 16h.01M16 12h.01"/>
+      </svg>Orders
+    </button>
+    <button class="tab" id="tslangs" onclick="go('slangs')">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>Slangs
+    </button>
+  </div>
+</div>
+
+<!-- BILLING TAB -->
+<div class="panel on" id="pbilling">
+  <!-- Left: Search + Results -->
+  <div id="pl">
+    <div id="sh">
+      <!-- Party selector -->
+      <div class="pr">
+        <span class="plbl">Party</span>
+        <div class="pw">
+          <input id="pi" type="text" placeholder="Search or create party…" autocomplete="off" spellcheck="false">
+          <div id="pd">
+            <div id="pdl"></div>
+            <div class="pnw" id="pnw" onclick="openPtyM()">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+              </svg><span id="pnwl">Create party</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Search bar -->
+      <div class="sw">
+        <span class="sico">⌕</span>
+        <input id="si" type="text"
+          placeholder="Part number · local name · vehicle…"
+          autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
+        <div class="scnt" id="scnt">—</div>
+      </div>
+      <!-- Keyboard hints (hidden on mobile) -->
+      <div class="khr">
+        <span class="ki"><kbd>↑↓</kbd> navigate</span>
+        <span class="ki"><kbd>↵</kbd> add</span>
+        <span class="ki"><kbd>Tab</kbd> rate</span>
+        <span class="ki"><kbd>Esc</kbd> clear</span>
+        <span class="ki"><kbd>Ctrl S</kbd> pick list</span>
+        <span class="ki"><kbd>Ctrl P</kbd> print</span>
+      </div>
+    </div>
+    <!-- Column headers -->
+    <div id="rh">
+      <span class="rhc">Part No</span>
+      <span class="rhc">Name</span>
+      <span class="rhc">Vehicle</span>
+      <span class="rhc c">Stock</span>
+      <span class="rhc r">MRP</span>
+    </div>
+    <!-- Result count -->
+    <div id="rm"><span class="rml" id="rml"></span></div>
+    <!-- Results -->
+    <div id="rl">
+      <div id="re">
+        <div class="re-i">🔍</div>
+        <div class="re-h">Search the catalogue</div>
+        <div class="re-s">
+          Type part number · local name · vehicle model<br>
+          Red left border = out of stock (still addable)
+        </div>
+      </div>
+      <div id="rrows"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Cart -->
+  <div id="pc">
+    <div id="ch">
+      <div class="ce" style="position:relative">
+        <span>Current Bill</span>
+        <span class="tbdg" id="cbdg" style="display:inline-block">0</span>
+        <span id="unsaved-dot" title="Unsaved changes — press Ctrl+S"></span>
+      </div>
+      <div id="cpty" class="cp"><span class="cp-e">No party selected</span></div>
+    </div>
+    <div id="cr">
+      <div id="ce2">Cart is empty.<br>Search a part → ↑↓ → Enter</div>
+      <div id="cit"></div>
+    </div>
+    <div id="cf">
+      <div id="ct">
+        <span class="ctl">Total</span>
+        <span id="ctv">₹0</span>
+      </div>
+      <div id="ca">
+        <button class="bpr" onclick="goPick()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
+          </svg>Review Pick List &nbsp;<kbd>Ctrl S</kbd>
+        </button>
+        <div class="brw">
+          <button class="bsc" onclick="expMarg()">Marg ERP</button>
+          <button class="bsc" onclick="expDMS()">Hero DMS</button>
+        </div>
+        <button class="bcl" onclick="clearCart()">Clear cart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PICK LIST TAB -->
+<div class="panel" id="ppick">
+  <div id="pkb">
+    <div class="pkt">Pick List</div>
+    <span class="pkpl" id="pkpl">—</span>
+    <span id="pk-ord-badge" style="font-size:10px;color:var(--t3);font-weight:500"></span>
+    <button class="bbk" onclick="go('billing')">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>Back
+    </button>
+    <button class="bprt" onclick="doPrint()">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/>
+      </svg>Print
+    </button>
+  </div>
+  <div id="pks">
+    <div id="pke" style="padding:44px;text-align:center;color:var(--t3);font-size:13px">
+      No items yet. Add parts in Billing tab.
+    </div>
+    <table id="pkt2" style="display:none">
+      <thead><tr>
+        <th style="width:76px">Bin</th>
+        <th style="width:104px">Part No</th>
+        <th>Description</th>
+        <th style="width:62px;text-align:center">Qty</th>
+        <th style="width:78px;text-align:right">Rate ₹</th>
+        <th style="width:78px;text-align:right">Amount</th>
+        <th style="width:82px;text-align:center">Found?</th>
+        <th style="width:22px"></th>
+      </tr></thead>
+      <tbody id="pkbd"></tbody>
+    </table>
+  </div>
+  <div id="pk-confirm-bar">
+    <div id="pk-ord-status" style="font-size:11.5px;color:var(--t3)">
+      Save order first with <kbd>Ctrl S</kbd>
+    </div>
+    <div style="display:flex;gap:7px;margin-left:auto">
+      <button class="bsc" onclick="expMarg()" style="font-size:11.5px;padding:5px 11px">Marg CSV</button>
+      <button class="bsc" onclick="expDMS()" style="font-size:11.5px;padding:5px 11px">Hero DMS</button>
+      <button class="bconf" id="bconf" onclick="confirmOrder()" disabled>
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>Confirm &amp; Store
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SYNC TAB -->
+<div class="panel" id="psync">
+  <div class="syp">
+    <div style="font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:3px">Data Sync</div>
+    <div style="font-size:11.5px;color:var(--t3);margin-bottom:14px">
+      Upload fresh stock or B_parts files. All data stored in Supabase — synced across devices.
+    </div>
+    <div class="sy-g">
+
+      <div class="syc">
+        <div class="sct">Supabase</div>
+        <div class="scs">
+          Project: lsnudhxlyypugunlgwxi<br>
+          Parts loaded: <strong id="ptl">—</strong>
+        </div>
+        <div id="cst" class="stpl sp-id"><div class="spd"></div>—</div>
+        <div style="display:flex;gap:6px;margin-top:9px">
+          <button onclick="testConn()" style="background:var(--b1);border:none;border-radius:var(--r);font-family:var(--f);font-size:12px;font-weight:500;color:var(--bl);padding:6px 11px;cursor:pointer">Test</button>
+          <button onclick="reloadApp()" style="background:var(--b1);border:none;border-radius:var(--r);font-family:var(--f);font-size:12px;font-weight:500;color:var(--bl);padding:6px 11px;cursor:pointer">↺ Reload</button>
+        </div>
+      </div>
+
+      <div class="syc">
+        <div class="sct">Stock File</div>
+        <div class="scs">
+          Hero DMS .xlsx export.<br>
+          Updates qty, DLC, bin. <em>RACK_NO from master CSV is ignored.</em>
+        </div>
+        <div class="dz" id="dzst">
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="hStock(event)">
+          <div class="dzi">📥</div>
+          <div class="dzt">Drop Hero DMS Excel</div>
+          <div class="dzs">.xlsx · .xls</div>
+        </div>
+        <div class="prog" id="stpr"><div class="pgf" id="stpf"></div></div>
+        <div class="slg" id="stlg">Ready.</div>
+      </div>
+
+      <div class="syc">
+        <div class="sct">B_parts File</div>
+        <div class="scs">
+          Your B_PARTS.xlsx.<br>
+          Col B = Part No &nbsp;·&nbsp; Col C = Local Name (short description shown on screen).
+        </div>
+        <div class="dz" id="dzbp">
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="hBparts(event)">
+          <div class="dzi">📋</div>
+          <div class="dzt">Drop B_PARTS.xlsx</div>
+          <div class="dzs">Col B = Part No · Col C = Name</div>
+        </div>
+        <div class="prog" id="bppr"><div class="pgf" id="bppf"></div></div>
+        <div class="slg" id="bplg">Ready.</div>
+      </div>
+
+      <div class="syc sy-f">
+        <div class="sct">Parties</div>
+        <div class="scs">Customers / shops — stored in Supabase, available everywhere.</div>
+        <div class="pmr">
+          <input class="fi" id="npn" type="text" placeholder="Party / shop name…">
+          <input class="fi" id="npp" type="text" placeholder="Phone" style="max-width:140px">
+          <button class="bsm" onclick="addPty()">Add</button>
+        </div>
+        <div class="pli" id="pmgl">
+          <div style="padding:11px;text-align:center;color:var(--t3);font-size:12px">Loading…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ORDERS HISTORY TAB -->
+<div class="panel" id="pord">
+  <div class="ordp">
+    <div style="font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:3px">Orders</div>
+    <div style="font-size:11.5px;color:var(--t3);margin-bottom:13px">
+      All saved orders. <strong>Confirmed</strong> orders export to Marg CSV for nightly import.
+      Pending = saved but not yet picked. Partial = some items not found.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:11px;align-items:center">
+      <button class="bsm2" onclick="loadOrders()">↺ Refresh</button>
+      <button class="bsm2" onclick="expAllMarg()">Export Confirmed → Marg CSV</button>
+      <span id="ord-count" style="font-size:11px;color:var(--t3);margin-left:auto"></span>
+    </div>
+    <div id="ord-list">
+      <div style="padding:44px;text-align:center;color:var(--t3);font-size:13px">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLANGS TAB -->
+<div class="panel" id="pslangs">
+  <div class="sgp">
+    <div style="font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:3px">Local Slangs</div>
+    <div style="font-size:11.5px;color:var(--t3);margin-bottom:13px">
+      Teach the app new local names. Saved to Supabase, takes effect instantly — no reload needed.
+    </div>
+    <div class="sgc">
+      <div class="sgt">Add / Override Name</div>
+      <div class="sgs">
+        Enter part number on left, your local name on right.<br>
+        <strong>Examples:</strong> &nbsp;Splendour Crank &nbsp;·&nbsp; SS Chain Kit &nbsp;·&nbsp; HF Deluxe Cluch Plate &nbsp;·&nbsp; Glamour Air Box
+      </div>
+      <div class="sgr">
+        <input class="sgpn" id="sgpn" type="text" placeholder="PART NO"
+          oninput="sgHint()" autocomplete="off" autocorrect="off">
+        <input class="sgnm" id="sgnm" type="text"
+          placeholder="Local name your team uses">
+        <button class="bsm" onclick="addSlang()">Save</button>
+      </div>
+      <div class="sgh" id="sgh"></div>
+    </div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;
+      letter-spacing:.5px;color:var(--t3);margin-bottom:7px">Saved Slangs</div>
+    <div class="sgl"><div id="sglr">
+      <div style="padding:13px;text-align:center;color:var(--t3);font-size:12px">None yet.</div>
+    </div></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- QTY SHEET (bottom sheet) -->
+<div id="ov">
+  <div id="sht">
+    <div class="shd"></div>
+    <div class="sh-pn" id="sh-pn"></div>
+    <div class="sh-nm" id="sh-nm"></div>
+    <div class="sh-ps" id="sh-ps"></div>
+    <div class="sh-g">
+      <div>
+        <div class="sh-gl">Quantity</div>
+        <input class="sh-n" id="sh-q" type="number" value="1" min="1">
+      </div>
+      <div>
+        <div class="sh-gl">Rate ₹</div>
+        <input class="sh-n" id="sh-r" type="number" step="0.01">
+        <div class="sh-w wmrp" id="wmrp">⚠ Rate above MRP</div>
+        <div class="sh-w wcst" id="wcst">⚠ Below cost price</div>
+      </div>
+    </div>
+    <div class="sh-bt">
+      <button class="sh-ca" onclick="closeSht()">Cancel</button>
+      <button class="sh-co" onclick="confirmAdd()">Add to Bill</button>
+    </div>
+  </div>
+</div>
+
+<!-- New party modal -->
+<div class="mb" id="pmm">
+  <div class="mbox">
+    <div class="mt">New Party</div>
+    <div class="ms">Saved to Supabase — available on all devices.</div>
+    <input class="mi" id="pmmi" type="text" placeholder="Party / shop name…">
+    <div class="mr2">
+      <button class="mca" onclick="closePtyM()">Cancel</button>
+      <button class="mok" onclick="savePtyM()">Create</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SB  = 'https://wqdpvalgkfqyfntalfxd.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxZHB2YWxna2ZxeWZudGFsZnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzODI3NDIsImV4cCI6MjA4ODk1ODc0Mn0.OIOeqjYci1QPfsToDdFJ_nnkWia_L9E68MkJYQWt7NY';
+
+const ALIAS={SPLENDER:'SPLENDOR',SPLENDOUR:'SPLENDOR',SPLENDAR:'SPLENDOR',
+  DESTINY:'DESTINI',MAESTRO:'MAESTRO EDGE',SPOKET:'SPROCKET',
+  SPOCKET:'SPROCKET',SPROKET:'SPROCKET',CLUCH:'CLUTCH',
+  BREAKPAD:'BRAKE PAD',BRAKESHOE:'BRAKE SHOE',
+  AIRFILTER:'AIR FILTER',CHAINKIT:'CHAIN KIT',HEADLAMP:'HEADLIGHT',
+  BSVI:'BS6',PISTONRING:'PISTON RING',OILSEAL:'OIL SEAL',
+  SPARKPLUG:'SPARK PLUG',DISC:'DISC PAD',DISKPAD:'DISC PAD',
+  SHOE:'BRAKE SHOE',CK:'CHAIN KIT',AIRBOX:'AIR FILTER',
+  PLUG:'SPARK PLUG',HF:'HF DELUXE',SS:'SUPER SPLENDOR',
+  GLMR:'GLAMOUR',GLAMOR:'GLAMOUR',XTREM:'XTREME',EXTREME:'XTREME'};
+
+function detectFam(q){
+  const u=q.toUpperCase();
+  if(/\bSUPER SPL|\bSS\b/.test(u))    return {m:/super splendo/i,x:null};
+  if(/\bISMART\b/.test(u))            return {m:/ismart/i,x:/super splendo/i};
+  if(/\bSPL(ENDO[RU]|ENDER|ENDAR)?\b/.test(u)||u==='SPL')
+                                       return {m:/splendo[ru]/i,x:/super splendo/i};
+  if(/\bHF\b/.test(u))                return {m:/hf (deluxe|dawn)/i,x:null};
+  if(/\bPASSION PRO\b/.test(u))       return {m:/passion pro/i,x:/passion x pro/i};
+  if(/\bXPRO\b|\bX PRO\b/.test(u))   return {m:/passion x pro/i,x:null};
+  if(/\bGLAMOUR\b/.test(u))          return {m:/glamour/i,x:null};
+  if(/\bDESTINI\b/.test(u))          return {m:/destini/i,x:null};
+  if(/\bMAESTRO\b/.test(u))          return {m:/maestro/i,x:null};
+  if(/\bXTREME\b/.test(u))           return {m:/xtreme/i,x:null};
+  if(/\bPLEASURE\b/.test(u))         return {m:/pleasure/i,x:null};
+  return null;
+}
+
+const hdr=(x={})=>({'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json',...x});
+const sb={
+  get:p=>fetch(SB+p,{headers:hdr()}).then(r=>r.ok?r.json():Promise.reject(r.status)),
+  post:(p,b,pf='return=minimal')=>fetch(SB+p,{method:'POST',headers:hdr({Prefer:pf}),body:JSON.stringify(b)}).then(r=>r.ok?(pf.includes('representation')?r.json():null):Promise.reject(r.status)),
+  patch:(p,b)=>fetch(SB+p,{method:'PATCH',headers:hdr({Prefer:'return=minimal'}),body:JSON.stringify(b)}).then(r=>r.ok),
+  del:p=>fetch(SB+p,{method:'DELETE',headers:hdr()}).then(r=>r.ok),
+  rpc:(fn,b)=>fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',headers:hdr(),body:JSON.stringify(b)}).then(r=>r.ok?r.json():null),
+};
+
+let PARTS=[],PFX={},WIDX={};
+let FREQ={};   // session frequency map: pn -> bill count this session
+let SLANGS=[],parties=[];
+let aPty=null,aItem=null;
+let cart=[],res=[],sel=-1;
+
+// THE ONE NAME shown on screen — b_parts_name (B_PARTS col C) or MANUAL_DESC fallback
+const DN=p=>(p.b_parts_name||'').trim()||p.manual_desc||p.market_name||p.official_desc;
+
+// ── BOOT ─────────────────────────────────────────────────────────────────
+async function boot(){
+  const fill=g('ldf'),msg=g('ldm'),retry=g('ldr');
+  retry.style.display='none'; fill.style.background='var(--bl)';
+  const step=(p,t)=>{fill.style.width=p+'%';msg.textContent=t;};
+  try{
+    step(5,'Connecting…');
+    const cr=await fetch(SB+'/rest/v1/parts_master?select=part_no&limit=0',{
+      headers:{...hdr(),Prefer:'count=exact','Range-Unit':'items',Range:'0-0'}
+    });
+    const tot=parseInt(cr.headers.get('content-range')?.split('/')[1]||'0');
+    if(!tot)throw new Error('parts_master empty — run migrate_final.py first');
+    step(8,'Fetching '+tot.toLocaleString()+' parts…');
+    const PAGE=1000,pages=Math.ceil(tot/PAGE);
+    let done=0;
+    const fetches=Array.from({length:pages},(_,i)=>
+      sb.get('/rest/v1/parts_master?select=part_no,market_name,official_desc,manual_desc,compatible_vehicles,vehicle_family,mrp,moq,status,stock_qty,dlc,bin1,is_bs6,search_blob,b_parts_name,frequency_score&order=part_no&offset='+(i*PAGE)+'&limit='+PAGE)
+        .then(rows=>{done++;step(Math.round(8+55*(done/pages)),'Loaded '+Math.min(done*PAGE,tot).toLocaleString()+'…');return rows;})
+    );
+    PARTS=(await Promise.all(fetches)).flat();
+    step(65,'Building index…'); await pause(8); buildIdx();
+    step(78,'Loading data…');
+    await Promise.all([loadSlangs(),loadParties()]);
+    step(100,'Ready');
+    g('ptl').textContent=PARTS.length.toLocaleString();
+    setSt('ok','Connected · '+PARTS.length.toLocaleString()+' parts');
+    await pause(200);
+    g('ld').style.display='none'; g('app').style.display='flex';
+    g('si').focus();
+  }catch(e){
+    msg.textContent='Error: '+String(e).slice(0,100);
+    retry.style.display='inline-block';
+    fill.style.background='var(--rd)'; fill.style.width='100%';
+  }
+}
+boot();
+function pause(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ── INDEX ─────────────────────────────────────────────────────────────────
+function buildIdx(){
+  PFX={};WIDX={};
+  for(let i=0;i<PARTS.length;i++){
+    const p=PARTS[i],pn=p.part_no;
+    // PN prefix index
+    for(let l=1;l<=Math.min(pn.length,12);l++){
+      const k=pn.slice(0,l);(PFX[k]||(PFX[k]=[])).push(i);
+    }
+    // Word index: search_blob already has all CSV cols + B_PARTS all-names
+    const blob=((p.search_blob||'')+' '+(p.b_parts_name||'')+' '+(p.manual_desc||'')).toUpperCase();
+    const words=blob.split(/[^A-Z0-9]+/);
+    const seen=new Set();
+    for(const w of words){
+      if(w.length<2||seen.has(w))continue; seen.add(w);
+      (WIDX[w]||(WIDX[w]=[])).push(i);
+    }
+  }
+}
+
+// ── FUZZY (Levenshtein ≤ 1) ───────────────────────────────────────────────
+function lev(a,b){
+  if(Math.abs(a.length-b.length)>2)return 99;
+  const m=a.length,n=b.length;
+  let prev=Array.from({length:n+1},(_,i)=>i);
+  for(let i=1;i<=m;i++){
+    const cur=[i];
+    for(let j=1;j<=n;j++)
+      cur.push(a[i-1]===b[j-1]?prev[j-1]:1+Math.min(prev[j],cur[j-1],prev[j-1]));
+    prev=cur;
+  }
+  return prev[n];
+}
+
+function expand(raw){
+  let u=raw.toUpperCase().trim();
+  for(const [w,c] of Object.entries(ALIAS))
+    u=u.replace(new RegExp('\\b'+w+'\\b','g'),c);
+  return u;
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────
+const SI=g('si');
+let stmr;
+SI.addEventListener('input',()=>{
+  clearTimeout(stmr);
+  stmr=setTimeout(()=>{const q=SI.value.trim();q?doSearch(q):clrRes();},70);
+});
+
+function doSearch(raw){
+  const q=expand(raw);
+  const tokens=q.split(/[ \t]+/).filter(Boolean);
+  const isPN=tokens.length===1&&/^[A-Z0-9\-]+$/.test(q);
+  const bs6Q=/BS6|BSVI/.test(q);
+  const fam=detectFam(q);
+  let cands;
+
+  if(isPN){
+    cands=PFX[q]?[...PFX[q]]:[];
+    if(cands.length<60)
+      for(const [k,arr] of Object.entries(PFX))
+        if(k!==q&&k.startsWith(q))cands=cands.concat(arr);
+    if(q.length<=8||cands.length<8){
+      const re=new RegExp(q.replace(/[.*+?^$|()[\]\\]/g,'\\$&'));
+      const seen=new Set(cands);
+      for(let i=0;i<PARTS.length;i++)
+        if(!seen.has(i)&&re.test(PARTS[i].search_blob))cands.push(i);
+    }
+    cands=[...new Set(cands)];
+  }else{
+    const t0=tokens[0];
+    let base=WIDX[t0]?[...WIDX[t0]]:[];
+    if(base.length<5)
+      for(const [w,arr] of Object.entries(WIDX))
+        if(w!==t0&&lev(t0,w)<=1)base=base.concat(arr);
+    const rest=tokens.slice(1).map(t=>new RegExp(t.replace(/[.*+?^$|()[\]\\]/g,'\\$&')));
+    const seen=new Set(); cands=[];
+    for(const i of base){
+      if(seen.has(i))continue; seen.add(i);
+      const hay=((PARTS[i].search_blob||'')+' '+(PARTS[i].b_parts_name||'')+' '+(PARTS[i].manual_desc||'')).toUpperCase();
+      if(rest.every(r=>r.test(hay)))cands.push(i);
+    }
+    for(let i=0;i<PARTS.length;i++){
+      if(seen.has(i))continue;
+      const dn=DN(PARTS[i]).toUpperCase();
+      if(dn&&tokens.every(t=>dn.includes(t))){cands.push(i);seen.add(i);}
+    }
+  }
+
+  if(fam)cands=cands.filter(i=>{
+    const v=PARTS[i].compatible_vehicles||'';
+    if(!fam.m.test(v))return false;
+    if(fam.x&&fam.x.test(v))return false;
+    return true;
+  });
+
+  // SCORE
+  const scored=cands.map(i=>{
+    const p=PARTS[i],pn=p.part_no;
+    const dn=DN(p).toUpperCase();
+    const mk=(p.market_name||'').toUpperCase();
+    let s=0;
+    if(pn===q)s+=25000; else if(pn.startsWith(q))s+=6000;
+    if(dn===q)s+=20000;
+    else if(dn.startsWith(q))s+=9000;
+    else if(tokens.every(t=>dn.includes(t)))s+=5000;
+    else if(tokens.some(t=>dn.includes(t)))s+=1500;
+    if(mk.includes(q))s+=2000;
+    else if(tokens.every(t=>mk.includes(t)))s+=1000;
+    if(p.stock_qty>0)s+=250;
+    if(p.is_bs6&&!bs6Q)s-=300;
+    // ── FREQUENCY: session billing boosts this part up for rest of session ──
+    s+=(FREQ[pn]||0)*150;
+    // ── FREQUENCY: persisted across sessions from Supabase ──────────────────
+    s+=Math.min(p.frequency_score||0,30)*50;
+    return[i,s];
+  });
+  scored.sort((a,b)=>b[1]-a[1]);
+  res=scored.slice(0,100).map(x=>PARTS[x[0]]);
+  sel=res.length>0?0:-1;
+  renderRes();
+}
+
+function clrRes(){
+  res=[];sel=-1;
+  g('rrows').innerHTML='';
+  g('re').style.display='flex';
+  g('rml').textContent='';
+  g('scnt').textContent='—';
+}
+
+function renderRes(){
+  const rows=g('rrows'),empty=g('re');
+  empty.style.display='none';
+  const f=document.createDocumentFragment();
+  for(let i=0;i<res.length;i++){
+    const p=res[i];
+    const ns=p.stock_qty===0;
+    const div=document.createElement('div');
+    div.className='rr'+(i===sel?' sel':'')+(ns?' ns':'');
+    div.dataset.i=i;
+    div.addEventListener('click',()=>openSht(i));
+    const stk=p.stock_qty;
+    const sc=stk>10?`<span class="chip ck">${stk}</span>`:
+              stk>0 ?`<span class="chip cl">${stk}</span>`:
+                     `<span class="chip cn">0</span>`;
+    const nc=p.status==='NON CURRENT'?` <span class="chip cnc">NC</span>`:'';
+    const mrp=p.mrp>0?'₹'+p.mrp.toLocaleString('en-IN'):'—';
+    // ONE name — b_parts_name (B_PARTS col C) or MANUAL_DESC
+    // Never show official_desc on screen
+    const dn=DN(p);
+    const fv=(p.compatible_vehicles||'').split(',')[0].trim().slice(0,28);
+    div.innerHTML=
+      `<div class="rr-pn">${p.part_no}</div>`+
+      `<div class="rr-nm">${esc(dn)}${nc}</div>`+
+      `<div class="rr-vh">${esc(fv)}</div>`+
+      `<div class="rr-st">${sc}</div>`+
+      `<div class="rr-mr">${mrp}</div>`;
+    f.appendChild(div);
+  }
+  g('rrows').innerHTML=''; g('rrows').appendChild(f);
+  const n=res.length;
+  g('rml').textContent=n?n+' result'+(n===1?'':'s'):'No results';
+  g('scnt').textContent=n?String(n):'—';
+  syncSel();
+}
+
+function syncSel(){
+  document.querySelectorAll('.rr').forEach((el,i)=>{
+    el.classList.toggle('sel',i===sel);
+    if(i===sel)el.scrollIntoView({block:'nearest',behavior:'smooth'});
+  });
+}
+
+SI.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){e.preventDefault();if(sel<res.length-1){sel++;syncSel();}}
+  else if(e.key==='ArrowUp'){e.preventDefault();if(sel>0){sel--;syncSel();}}
+  else if(e.key==='Enter'){
+    e.preventDefault();
+    if(!SI.value.trim()||!res.length)return;
+    if(sel<0)sel=0; openSht(sel);
+  }
+  else if(e.key==='Escape'){SI.value='';clrRes();}
+});
+
+document.addEventListener('keydown',e=>{
+  // Ctrl+S = Save order (never "Save webpage")
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){
+    e.preventDefault();e.stopImmediatePropagation();
+    saveOrder();
+    return false;
+  }
+  // Ctrl+P = Print pick list (never "Print page")
+  if((e.ctrlKey||e.metaKey)&&e.key==='p'){
+    e.preventDefault();e.stopImmediatePropagation();
+    doPrint();
+    return false;
+  }
+},true); // capture phase — fires before browser default
+
+// ── QTY SHEET ─────────────────────────────────────────────────────────────
+function openSht(idx){
+  if(idx<0||idx>=res.length)return;
+  aItem=res[idx];
+  const p=aItem;
+  g('sh-pn').textContent=p.part_no;
+  g('sh-nm').textContent=DN(p);  // local/b_parts name only
+  const stk=p.stock_qty;
+  const sc=stk>10?'var(--gn)':stk>0?'var(--am)':'var(--rd)';
+  g('sh-ps').innerHTML=
+    `<div class="sh-p"><div class="sh-dot" style="background:var(--bl)"></div>MRP ₹${p.mrp>0?p.mrp.toLocaleString('en-IN'):'—'}</div>`+
+    `<div class="sh-p"><div class="sh-dot" style="background:${sc}"></div>${stk>0?stk+' pcs':'Out of stock'}</div>`+
+    `<div class="sh-p"><div class="sh-dot" style="background:var(--bl)"></div>${p.bin1||'No bin'}</div>`+
+    (p.moq>1?`<div class="sh-p">MOQ ${p.moq}</div>`:'');
+  g('sh-q').value=1;
+  g('sh-r').value=p.mrp>0?p.mrp:'';
+  g('wmrp').style.display='none'; g('wcst').style.display='none';
+  g('ov').classList.add('on');
+  setTimeout(()=>{g('sh-q').select();g('sh-q').focus();},55);
+}
+function closeSht(){g('ov').classList.remove('on');aItem=null;SI.focus();SI.select();}
+
+function confirmAdd(){
+  if(!aItem)return;
+  const qty=Math.max(1,parseInt(g('sh-q').value)||1);
+  const rate=parseFloat(g('sh-r').value)||aItem.mrp;
+  if(aItem.mrp>0&&rate>aItem.mrp*1.005)toast('⚠ Rate above MRP');
+  if(aItem.dlc>0&&rate<aItem.dlc)toast('⚠ Rate below cost');
+  const ex=cart.find(c=>c.pn===aItem.part_no);
+  if(ex){ex.qty+=qty;}
+  else cart.push({
+    pn:aItem.part_no,
+    display:DN(aItem),          // screen & pick list: local name
+    official:aItem.official_desc, // export only: Hero official desc
+    bin:aItem.bin1||'',
+    mrp:aItem.mrp,dlc:aItem.dlc,qty,rate
+  });
+  // Session frequency: this part ranks higher for rest of session
+  FREQ[aItem.part_no]=(FREQ[aItem.part_no]||0)+1;
+  renderCart();
+  markDirty();  // cart changed → order needs re-saving
+  closeSht(); SI.value=''; clrRes(); SI.focus();
+  toast('Added '+qty+'× '+aItem.part_no);
+  incFreq(aItem.part_no);
+}
+async function incFreq(pn){try{await sb.rpc('increment_frequency',{part_numbers:[pn]});}catch(_){}}
+
+g('sh-q').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();confirmAdd();}
+  if(e.key==='Escape')closeSht();
+  if(e.key==='Tab'){e.preventDefault();g('sh-r').focus();g('sh-r').select();}
+});
+g('sh-r').addEventListener('input',()=>{
+  const r=parseFloat(g('sh-r').value)||0;
+  const mrp=aItem?.mrp||0,dlc=aItem?.dlc||0;
+  g('wmrp').style.display=(mrp>0&&r>mrp*1.005)?'block':'none';
+  g('wcst').style.display=(dlc>0&&r<dlc)?'block':'none';
+});
+g('sh-r').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();confirmAdd();}
+  if(e.key==='Escape')closeSht();
+});
+g('ov').addEventListener('click',e=>{if(e.target===g('ov'))closeSht();});
+
+// ── CART ──────────────────────────────────────────────────────────────────
+function renderCart(){
+  const items=g('cit'),empty=g('ce2');
+  const badge=g('cbdg'),pkb=g('pkbdg');
+  if(!cart.length){
+    empty.style.display='block'; items.innerHTML='';
+    badge.textContent='0'; badge.style.background='var(--t4)';
+    if(pkb)pkb.style.display='none';
+    g('ctv').textContent='₹0';
+    g('cpty').innerHTML='<span class="cp-e">No party selected</span>';
+    return;
+  }
+  empty.style.display='none';
+  badge.textContent=cart.length; badge.style.background='var(--bl)';
+  if(pkb){pkb.style.display='inline-block';pkb.textContent=cart.length;}
+  g('cpty').textContent=aPty?aPty.name:'⚠ Select party';
+  let grand=0;
+  const f=document.createDocumentFragment();
+  cart.forEach((item,i)=>{
+    const amt=item.qty*item.rate; grand+=amt;
+    const d=document.createElement('div'); d.className='ci';
+    d.innerHTML=
+      `<div class="cib">`+
+        `<div class="ci-pn">${item.pn}</div>`+
+        `<div class="ci-nm">${esc(item.display)}</div>`+
+        `<div class="ci-sb"><span class="ci-q">${item.qty}×</span>`+
+          `<span>₹${item.rate.toFixed(0)}</span>`+
+          (item.bin?`<span>|</span><span>${item.bin}</span>`:'')+
+        `</div></div>`+
+      `<div class="cia">₹${amt.toLocaleString('en-IN',{maximumFractionDigits:0})}</div>`+
+      `<button class="db" onclick="rmI(${i})">✕</button>`;
+    f.appendChild(d);
+  });
+  items.innerHTML=''; items.appendChild(f);
+  g('ctv').textContent='₹'+grand.toLocaleString('en-IN',{maximumFractionDigits:0});
+}
+function rmI(i){cart.splice(i,1);markDirty();renderCart();}
+function clearCart(){if(!cart.length)return;if(confirm('Clear cart?')){cart=[];renderCart();}}
+
+// ── ORDER STATE ────────────────────────────────────────────────────────────
+// An "order" is saved to Supabase orders + order_items tables.
+// Status: 'pending' → saved but not yet picked/confirmed
+//         'confirmed' → picker confirmed all items found (or adjusted)
+//         'partial' → confirmed with some items marked not found
+let currentOrderId = null;   // UUID of saved order
+let orderDirty     = false;  // cart modified since last save
+let pickStatus     = {};     // pn → 'found'|'miss'|'part'  (set during pick verification)
+
+function markDirty(){
+  orderDirty=true;
+  // Tiny amber dot in cart header — zero layout shift
+  const dot=g('unsaved-dot'); if(dot) dot.classList.add('on');
+}
+function clearDirty(){
+  orderDirty=false;
+  const dot=g('unsaved-dot'); if(dot) dot.classList.remove('on');
+}
+function showBanner(type,msg,ordId){
+  // Banner replaced by dot. Show toast for save feedback only.
+  if(type==='saved'){
+    clearDirty();
+    toast('✓ Saved'+(ordId?' #'+ordId.slice(-6).toUpperCase():''));
+  } else if(type==='saving'){
+    // dot already showing — no extra UI needed
+  } else if(type==='dirty'){
+    markDirty(); // ensures dot is on
+  }
+}
+
+// ── SAVE ORDER (Ctrl+S) ────────────────────────────────────────────────────
+// Saves cart to Supabase orders + order_items, then opens Pick List for verification.
+async function saveOrder(){
+  if(!aPty){toast('Select a party first');return;}
+  if(!cart.length){toast('Cart is empty');return;}
+  showBanner('saving','Saving…');
+  const now=new Date().toISOString();
+  const ordNum='ORD-'+now.slice(0,10).replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+  try{
+    // Upsert order header
+    const ord={
+      id: currentOrderId||undefined,
+      order_number: ordNum,
+      party_id:  aPty.id,
+      party_name: aPty.name,
+      status: 'pending',
+      total: cart.reduce((s,c)=>s+c.qty*c.rate,0),
+      item_count: cart.length,
+      created_at: now,
+      updated_at: now,
+    };
+    if(currentOrderId) delete ord.order_number; // keep original number on re-save
+    const saved=await sb.post('/rest/v1/orders',ord,'resolution=merge-duplicates,return=representation');
+    const ordRow=Array.isArray(saved)?saved[0]:saved;
+    currentOrderId=ordRow?.id||currentOrderId;
+    const ordNo=ordRow?.order_number||ordNum;
+
+    // Delete existing items then re-insert (clean re-save)
+    if(currentOrderId)
+      await sb.del('/rest/v1/order_items?order_id=eq.'+currentOrderId);
+    const items=cart.map(c=>({
+      order_id:    currentOrderId,
+      part_no:     c.pn,
+      display_name:c.display,
+      official_desc:c.official||'',
+      bin:         c.bin||'',
+      mrp:         c.mrp,
+      qty_ordered: c.qty,
+      qty_picked:  c.qty,   // default same; picker can change
+      rate:        c.rate,
+      amount:      c.qty*c.rate,
+      status:      'pending',
+    }));
+    await sb.post('/rest/v1/order_items',items,'resolution=merge-duplicates,return=minimal');
+
+    orderDirty=false;
+    // Init pickStatus all found
+    pickStatus={};
+    cart.forEach(c=>pickStatus[c.pn]='found');
+
+    showBanner('saved','Saved',ordNo);
+    g('pk-ord-badge').textContent='Order '+ordNo.slice(-10);
+    g('bconf').disabled=false;
+    updateConfirmBar();
+    toast('Order saved — verify in Pick List');
+    go('pick');   // ← automatically go to pick list for verification
+  }catch(e){
+    showBanner('dirty','Save failed — check connection');
+    toast('❌ Save failed: '+String(e).slice(0,40));
+  }
+}
+
+// ── PICK LIST ─────────────────────────────────────────────────────────────
+function goPick(){
+  if(!aPty){toast('Select a party first');return;}
+  if(!cart.length){toast('Cart is empty');return;}
+  if(orderDirty||!currentOrderId){
+    saveOrder(); // save first, then go() is called inside saveOrder
+  } else {
+    go('pick');
+  }
+}
+
+function renderPick(){
+  const tbl=g('pkt2'),body=g('pkbd'),empty=g('pke');
+  g('pkpl').textContent=aPty?aPty.name:'—';
+  if(!cart.length){
+    empty.style.display='block';tbl.style.display='none';
+    g('pktt').textContent='₹0';
+    updateConfirmBar(); return;
+  }
+  empty.style.display='none'; tbl.style.display='table';
+  const sorted=[...cart].sort((a,b)=>(a.bin||'ZZZ').localeCompare(b.bin||'ZZZ'));
+  let grand=0;
+  body.innerHTML=sorted.map(item=>{
+    const oi=cart.indexOf(item);
+    const amt=item.qty*item.rate; grand+=amt;
+    const ps=pickStatus[item.pn]||'found';
+    const isMiss=ps==='miss';
+    const rowCls=isMiss?' class="miss-row"':'';
+    const btnFound=`<button class="pk-status ps-found" onclick="setPkSt('${item.pn}','found')" style="opacity:${ps==='found'?1:.35}">✓ Found</button>`;
+    const btnMiss=`<button class="pk-status ps-miss" onclick="setPkSt('${item.pn}','miss')" style="opacity:${ps==='miss'?1:.35}">✕ Not Found</button>`;
+    return `<tr${rowCls} id="pkr-${oi}">
+      <td>${item.bin?`<span class="ptb">${item.bin}</span>`:'<span style="color:var(--t4)">—</span>'}</td>
+      <td><div class="ptp">${item.pn}</div></td>
+      <td><div class="ptn ${isMiss?'miss-row':''}">${esc(item.display)}</div></td>
+      <td style="text-align:center"><input class="edt" type="number" value="${item.qty}" min="0" onchange="pkEd(${oi},'qty',this.value)" onfocus="this.select()" ${isMiss?'disabled':''}></td>
+      <td style="text-align:right"><input class="edt" type="number" step="0.01" value="${item.rate.toFixed(2)}" onchange="pkEd(${oi},'rate',this.value)" onfocus="this.select()" ${isMiss?'disabled':''}></td>
+      <td style="text-align:right"><div class="ptam" id="pa${oi}">₹${isMiss?'0':amt.toLocaleString('en-IN',{maximumFractionDigits:0})}</div></td>
+      <td style="text-align:center;white-space:nowrap">${btnFound} ${btnMiss}</td>
+      <td><button class="db" onclick="rmI(${oi});renderPick()">✕</button></td>
+    </tr>`;
+  }).join('');
+  g('pktt').textContent='₹'+grand.toLocaleString('en-IN',{maximumFractionDigits:0});
+  updateConfirmBar();
+}
+
+function setPkSt(pn,st){
+  pickStatus[pn]=st;
+  renderPick();
+}
+
+function pkEd(idx,field,val){
+  if(field==='qty'){
+    const q=Math.max(0,parseInt(val)||0);
+    cart[idx].qty=q;
+    if(q===0) pickStatus[cart[idx].pn]='miss';
+    else pickStatus[cart[idx].pn]='found';
+  }
+  if(field==='rate')cart[idx].rate=Math.max(0,parseFloat(val)||0);
+  const item=cart[idx];
+  const miss=pickStatus[item.pn]==='miss';
+  const amt=miss?0:item.qty*item.rate;
+  const el=g('pa'+idx); if(el)el.textContent='₹'+amt.toLocaleString('en-IN',{maximumFractionDigits:0});
+  let gd=0; cart.forEach((c,i)=>{if(pickStatus[c.pn]!=='miss')gd+=c.qty*c.rate;});
+  const tv='₹'+gd.toLocaleString('en-IN',{maximumFractionDigits:0});
+  g('pktt').textContent=tv; g('ctv').textContent=tv;
+  updateConfirmBar();
+}
+
+function updateConfirmBar(){
+  const bar=g('pk-confirm-bar');
+  if(!bar)return;
+  const stat=g('pk-ord-status');
+  const btn=g('bconf');
+  if(!currentOrderId){
+    stat.innerHTML='Press <kbd>Ctrl S</kbd> to save order before confirming';
+    if(btn)btn.disabled=true;
+    return;
+  }
+  const total=cart.length;
+  const missCount=Object.values(pickStatus).filter(v=>v==='miss').length;
+  const foundCount=total-missCount;
+  if(missCount===0){
+    stat.innerHTML=`<span style="color:var(--ok-f);font-weight:600">✓ All ${total} items found</span> — confirm to store`;
+  } else {
+    stat.innerHTML=`<span style="color:var(--am);font-weight:600">${foundCount}/${total} found</span>, <span style="color:var(--rd)">${missCount} not found</span> — confirm to store partial`;
+  }
+  if(btn)btn.disabled=false;
+}
+
+// ── CONFIRM & STORE ────────────────────────────────────────────────────────
+// Marks order as confirmed/partial in Supabase.
+// Nightly Marg import: export confirmed orders as CSV.
+async function confirmOrder(){
+  if(!currentOrderId){toast('Save order first');return;}
+  const missCount=Object.values(pickStatus).filter(v=>v==='miss').length;
+  const status=missCount===0?'confirmed':'partial';
+  const btn=g('bconf');
+  if(btn){btn.disabled=true;btn.textContent='Saving…';}
+
+  try{
+    // Update order_items with actual picked qty + status
+    for(const item of cart){
+      const st=pickStatus[item.pn]||'found';
+      const pickedQty=st==='miss'?0:item.qty;
+      await sb.patch(
+        `/rest/v1/order_items?order_id=eq.${currentOrderId}&part_no=eq.${encodeURIComponent(item.pn)}`,
+        {qty_picked:pickedQty,status:st,amount:pickedQty*item.rate}
+      );
+    }
+    // Update order header
+    const total=cart.filter(c=>pickStatus[c.pn]!=='miss').reduce((s,c)=>s+c.qty*c.rate,0);
+    await sb.patch(`/rest/v1/orders?id=eq.${currentOrderId}`,
+      {status,total,updated_at:new Date().toISOString()});
+
+    // Increment frequency for found items
+    const foundPNs=cart.filter(c=>pickStatus[c.pn]!=='miss').map(c=>c.pn);
+    if(foundPNs.length) await sb.rpc('increment_frequency',{part_numbers:foundPNs});
+
+    toast(status==='confirmed'?'✓ Order confirmed & stored':'⚠ Order stored as partial');
+    showBanner('saved',status==='confirmed'?'Order confirmed':'Order stored (partial)',currentOrderId);
+
+    // Reset for next order
+    cart=[];pickStatus={};currentOrderId=null;clearDirty();
+    renderCart();
+    g('pk-ord-badge').textContent='';
+    go('billing');
+    loadOrders();
+  }catch(e){
+    toast('Confirm failed: '+String(e).slice(0,40));
+    if(btn){btn.disabled=false;btn.textContent='Confirm & Store';}
+  }
+}
+
+// ── PRINT PICK LIST (Ctrl+P) ───────────────────────────────────────────────
+// Always prints pick list, not the screen.
+// If not on pick list tab, saves first then prints.
+function doPrint(){
+  if(!cart.length){toast('Cart is empty');return;}
+  if(!aPty){toast('Select a party first');return;}
+  _doPrintNow();
+}
+function _doPrintNow(){
+  const pty=(aPty&&aPty.name)||'\u2014';
+  const ordNo=currentOrderId?(' \u00b7 Order #'+currentOrderId.slice(-6).toUpperCase()):'';
+  const now=new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const sorted=[...cart].sort((a,b)=>(a.bin||'ZZZ').localeCompare(b.bin||'ZZZ'));
+  const rows=sorted.map((item,i)=>{
+    const part=PARTS.find(p=>p.part_no===item.pn);
+    const stk=part?part.stock_qty:0;
+    const stkCell=stk>0?String(stk):`<span style="color:#cc0000;font-weight:800">0</span>`;
+    const rowBg=i%2===0?'#ffffff':'#f5f5f5';
+    return `<tr style="background:${rowBg}">
+      <td class="bin">${item.bin||'\u2014'}</td>
+      <td class="pn">${item.pn}</td>
+      <td class="nm">${esc(item.display)}</td>
+      <td class="qty">${item.qty}</td>
+      <td class="stock">${stkCell}</td>
+      <td class="rate">&#8377;${item.rate.toFixed(0)}</td>
+      <td class="diff"></td>
+      <td class="chk">\u2610</td>
+    </tr>`;
+  }).join('');
+  const totalQty=cart.reduce((s,c)=>s+c.qty,0);
+  const w=window.open('','_blank','width=960,height=720');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pick List \u2014 ${pty}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  background:#ffffff;
+  color:#111111;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  padding:28px 36px;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact
+}
+.hdr{
+  margin-bottom:18px;
+  padding-bottom:12px;
+  border-bottom:2.5px solid #111;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end
+}
+.hdr-l .co{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:#666;margin-bottom:4px
+}
+.hdr-l h1{
+  font-size:21px;font-weight:800;letter-spacing:-.4px;
+  color:#111;margin-bottom:2px
+}
+.hdr-l .meta{font-size:10px;color:#666}
+.hdr-r{text-align:right}
+.hdr-r .pl{
+  font-size:8px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:#666;margin-bottom:3px
+}
+.hdr-r .pty{font-size:16px;font-weight:800;color:#111}
+.hdr-r .ordno{font-size:10px;font-family:monospace;color:#0055cc;margin-top:2px}
+table{width:100%;border-collapse:collapse}
+thead tr{background:#111;border-bottom:2px solid #111}
+thead th{
+  padding:7px 8px;font-size:8px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.7px;
+  color:#ffffff;text-align:left
+}
+tbody tr{border-bottom:1px solid #ddd}
+td{padding:9px 8px;vertical-align:middle}
+.bin{
+  font-family:monospace;font-size:11px;font-weight:800;
+  color:#0055cc;white-space:nowrap;width:72px
+}
+.pn{
+  font-family:monospace;font-size:10px;font-weight:600;
+  color:#333;white-space:nowrap;width:126px
+}
+.nm{font-size:12.5px;font-weight:600;color:#111}
+.qty{
+  text-align:center;font-size:16px;font-weight:900;
+  color:#111;width:52px
+}
+.stock{
+  text-align:center;font-size:13px;font-weight:700;
+  color:#444;width:64px
+}
+.rate{
+  text-align:right;font-size:12px;font-weight:600;
+  color:#333;width:62px;white-space:nowrap
+}
+.diff{
+  width:86px;
+  border-bottom:1.5px solid #999;
+  /* blank \u2014 picker writes physical count here */
+}
+.chk{
+  text-align:center;font-size:18px;color:#bbb;width:38px
+}
+tfoot tr{border-top:2.5px solid #111}
+tfoot td{padding:7px 8px;font-size:9px;font-weight:600;color:#444}
+.ft{
+  margin-top:14px;padding-top:10px;border-top:1px solid #ccc;
+  font-size:8px;color:#666;line-height:2
+}
+.ft b{color:#111}
+@page{margin:.4in;size:A4}
+</style></head><body>
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="co">Yantrayug \u00b7 Hero Hub</div>
+    <h1>Warehouse Pick List</h1>
+    <div class="meta">${now}${ordNo} \u00b7 ${cart.length} line${cart.length===1?'':'s'}</div>
+  </div>
+  <div class="hdr-r">
+    <div class="pl">Bill To</div>
+    <div class="pty">${esc(pty)}</div>
+    ${currentOrderId?`<div class="ordno">${ordNo.trim()}</div>`:''}
+  </div>
+</div>
+<table>
+  <thead><tr>
+    <th style="width:72px">Bin</th>
+    <th style="width:126px">Part No</th>
+    <th>Description</th>
+    <th style="width:52px;text-align:center">Need</th>
+    <th style="width:64px;text-align:center">Stock</th>
+    <th style="width:62px;text-align:right">Rate</th>
+    <th style="width:86px;text-align:center">Actual \u2193</th>
+    <th style="width:38px;text-align:center">\u2713</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+  <tfoot><tr>
+    <td colspan="3" style="color:#666;font-size:9px">
+      Need = qty required \u00b7 Stock = system count \u00b7 Actual \u2193 = write physical count if shelf differs
+    </td>
+    <td style="text-align:center;color:#111;font-size:15px;font-weight:900">${totalQty}</td>
+    <td colspan="4"></td>
+  </tr></tfoot>
+</table>
+<div class="ft">
+  <b>Instructions:</b> &nbsp;
+  Pick in Bin order \u00b7 if shelf count differs from Stock, write the real number in <b>Actual \u2193</b> \u00b7
+  tick \u2611 when collected \u00b7 flag shortfalls to billing before finalising the order
+  &nbsp;\u00b7&nbsp; <b>Yantrayug</b>
+</div>
+</body></html>`);
+  w.document.close(); w.onload=()=>{w.focus();w.print();};
+}
+
+
+// ── EXPORTS ───────────────────────────────────────────────────────────────
+function chkP(){if(!aPty){toast('Select a party first');return false;}return true;}
+// ── EXPORT HELPERS ────────────────────────────────────────────────────────
+// Marg discount is 15.27% fixed (Hero standard dealer rate)
+// Unit Price in Marg = MRP.  Net Selling Price = MRP × (1 - 0.1527) = cart rate.
+// Assessable = NetSell × Qty.  CGST/SGST = 9% each on Assessable.
+const DISC_PCT  = 15.27;
+const DEALER_CD = 500109;
+const LOC_CD    = 9;
+
+function margRow(partyName, item, grandTotal, dateStr){
+  // item = { pn, official, mrp, qty, rate, hsn, gst_rate }
+  const mrp       = parseFloat(item.mrp)||0;
+  const qty       = parseInt(item.qty)||0;
+  const discAmt   = round2(mrp * DISC_PCT / 100);
+  const netSell   = round2(mrp - discAmt);          // should equal cart rate
+  const assessVal = round2(netSell * qty);
+  const gstRate   = parseInt(item.gst_rate)||18;
+  const halfGst   = gstRate / 2;                    // 9 for 18% GST
+  const cgstAmt   = round2(assessVal * halfGst / 100);
+  const sgstAmt   = cgstAmt;
+  // 64-column Marg format — blank cols use empty string
+  const today = dateStr;
+  const cols = [
+    DEALER_CD,            // 1  Dealer Code
+    today,                // 2  Record Updated dt
+    DEALER_CD,            // 3  LOGIN
+    LOC_CD,               // 4  Location Code
+    esc2(partyName),      // 5  Customer Name
+    '',                   // 6  Customer Code
+    '',                   // 7  Customer Category
+    '',                   // 8  Invoice Number
+    today,                // 9  Invoice Date
+    '',                   // 10 Parent
+    '',                   // 11 Sale return Date
+    '',                   // 12 Invoice Status
+    '',                   // 13 Voucher
+    '',                   // 14 Type
+    item.pn,              // 15 Part No
+    esc2(item.official||item.display||''), // 16 Part Name
+    '',                   // 17 UOM
+    item.hsn||'',         // 18 HSN Number
+    '',                   // 19 Product Type
+    '',                   // 20 Product Category
+    '',                   // 21 GST Category  (blank — Marg looks it up by part)
+    '',                   // 22 GST Sub-Category
+    qty,                  // 23 Quantity
+    mrp,                  // 24 Unit Price (= MRP)
+    DISC_PCT,             // 25 Line Item Discount %
+    discAmt,              // 26 Line Item Discount
+    netSell,              // 27 Net Selling Price
+    assessVal,            // 28 Assessable Value
+    '',                   // 29 VAT %
+    '',                   // 30 VAT Amount
+    '',                   // 31 Freight Amt
+    '',                   // 32 Packaging Charges
+    halfGst,              // 33 CGST %
+    cgstAmt,              // 34 CGST Amt
+    halfGst,              // 35 SGST %
+    sgstAmt,              // 36 SGST Amt
+    '',                   // 37 UT GST %
+    '',                   // 38 UT GST Amt
+    '',                   // 39 IGST %
+    '',                   // 40 IGST Amt
+    '',                   // 41 Additional Tax Amt
+    '',                   // 42 Additional Tax Amt2
+    '',                   // 43 Additional Tax Amt3
+    '',                   // 44 Additional Tax Amt4
+    '',                   // 45 Additional Tax Amt5
+    '',                   // 46 Cess %
+    '',                   // 47 Cess Amt
+    grandTotal,           // 48 Total Invoice Amount (same on every row)
+    '',                   // 49 Narration
+    '',                   // 50 Cancellation Date
+    '',                   // 51 Invoice Format
+    '',                   // 52 Executive Name
+    '',                   // 53 Additional Discount %
+    '',                   // 54 Cash Discount %
+    '',                   // 55 Credit Days
+    '',                   // 56 Invoice Type
+    '',                   // 57 FRT PKG CGST %
+    '',                   // 58 FRT PKG CGST AMT
+    '',                   // 59 FRT PKG SGST/UTGST %
+    '',                   // 60 FRT PKG SGST/UTGST AMT
+    '',                   // 61 FRT PKG IGST %
+    '',                   // 62 FRT PKG IGST AMT
+    '',                   // 63 FRT PKG CESS %
+    '',                   // 64 FRT PKG CESS AMT
+  ];
+  return cols.join(',');
+}
+
+function margHeader(){
+  return 'Dealer Code,Record Updated dt,LOGIN,Location Code,Customer Name,Customer Code,Customer Category,Invoice Number,Invoice Date,Parent,Sale return Date,Invoice Status,Voucher,Type,Part No,Part Name,UOM,HSN Number,Product Type,Product Category,GST Category,GST Sub-Category,Quantity,Unit Price,Line Item Discount %,Line Item Discount,Net Selling Price,Assessable Value,VAT %,VAT Amount,Freight Amt,Packaging Charges,CGST %,CGST Amt,SGST %,SGST Amt,UT GST %,UT GST Amt,IGST %,IGST Amt,Additional Tax Amt,Additional Tax Amt2,Additional Tax Amt3,Additional Tax Amt4,Additional Tax Amt5,Cess %,Cess Amt,Total Invoice Amount,Narration,Cancellation Date,Invoice Format,Executive Name,Additional Discount %,Cash Discount %,Credit Days,Invoice Type,FRT PKG CGST %,FRT PKG CGST AMT,FRT PKG SGST/UTGST %,FRT PKG SGST/UTGST AMT,FRT PKG IGST %,FRT PKG IGST AMT,FRT PKG CESS %,FRT PKG CESS AMT';
+}
+
+function calcGrandTotal(items, dateStr){
+  // Grand total = sum of all (assessable + CGST + SGST) across all line items
+  let total = 0;
+  for(const c of items){
+    const mrp = parseFloat(c.mrp)||0;
+    const qty = parseInt(c.qty)||0;
+    const netSell = round2(mrp - round2(mrp * DISC_PCT / 100));
+    const assess  = round2(netSell * qty);
+    const gst     = parseInt(c.gst_rate)||18;
+    total += assess + round2(assess * gst / 100);
+  }
+  return round2(total);
+}
+
+function round2(n){ return Math.round((parseFloat(n)||0)*100)/100; }
+
+// ── MARG ERP EXPORT (from cart — exact 64-col template format) ─────────────
+function expMarg(){
+  if(!chkP()||!cart.length)return;
+  const party  = aPty.name;
+  const today  = new Date().toLocaleDateString('en-GB').split('/').reverse().join('-'); // YYYY-MM-DD
+  // Enrich cart items with HSN + gst_rate from in-memory PARTS
+  const items = cart.map(c=>{
+    const p = PARTS.find(x=>x.part_no===c.pn)||{};
+    return {...c, hsn: p.hsn_code||'', gst_rate: 18};
+  });
+  const grand  = calcGrandTotal(items);
+  const header = margHeader();
+  const rows   = items.map(c=>margRow(party, c, grand, today));
+  const csv    = [header, ...rows].join('\n');
+  dl('Marg_'+party+'_'+ts()+'.csv', csv, 'text/csv');
+  toast('Marg ERP CSV — '+items.length+' lines, ₹'+grand.toLocaleString('en-IN'));
+}
+
+// ── HERO DMS ORDER CSV (simplified 3-col template: LINE #, Part #, Order Qty) ──
+// This matches Parts_Sales_Order_Template_1.csv exactly
+function expDMS(){
+  if(!chkP()||!cart.length)return;
+  const rows = cart.map((c,i)=>`${i+1},${c.pn},${c.qty}`);
+  const csv  = ['LINE #,Part #,Order Qty', ...rows].join('\n');
+  dl('Parts_Sales_Order_'+ts()+'.csv', csv, 'text/csv');
+  toast('Hero DMS Order CSV — '+cart.length+' parts');
+}
+function dl(n,d,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([d],{type:m}));a.download=n;a.click();}
+function ts(){return new Date().toISOString().replace(/[:.]/g,'-').slice(0,16);}
+
+// ── PARTIES ───────────────────────────────────────────────────────────────
+async function loadParties(){
+  try{parties=await sb.get('/rest/v1/billing_parties?select=id,name,phone&order=name');}
+  catch(e){parties=JSON.parse(localStorage.getItem('yg_p')||'[]');}
+  localStorage.setItem('yg_p',JSON.stringify(parties));
+  renderPtyMgr();
+}
+function svP(){localStorage.setItem('yg_p',JSON.stringify(parties));}
+async function addPtyToSB(name,phone){
+  try{const r=await sb.post('/rest/v1/billing_parties',{name,phone},'return=representation');
+    const p=Array.isArray(r)?r[0]:r; parties.push(p); svP(); return p;}
+  catch(e){const p={id:'l'+Date.now(),name,phone}; parties.push(p); svP(); return p;}
+}
+async function delPtyIdx(idx){
+  const p=parties[idx]; if(!p)return;
+  await delPty(p.id);
+}
+async function delPty(id){
+  parties=parties.filter(p=>p.id!==id); svP(); renderPtyMgr();
+  try{await sb.del('/rest/v1/billing_parties?id=eq.'+id);}catch(e){}
+}
+function renderPtyMgr(){
+  const el=g('pmgl'); if(!el)return;
+  if(!parties.length){el.innerHTML='<div style="padding:11px;text-align:center;color:var(--t3);font-size:12px">No parties.</div>';return;}
+  el.innerHTML=parties.map((p,idx)=>`<div class="plr"><div><div style="font-weight:600">${esc(p.name)}</div>${p.phone?`<div style="font-size:10px;color:var(--t3)">${esc(p.phone)}</div>`:''}</div><button class="pld" onclick="delPtyIdx(${idx})">✕</button></div>`).join('');
+}
+async function addPty(){
+  const n=g('npn').value.trim(),ph=g('npp').value.trim();
+  if(!n){toast('Enter a name');return;}
+  await addPtyToSB(n,ph); g('npn').value=''; g('npp').value='';
+  renderPtyMgr(); toast('"'+n+'" added');
+}
+const PIE=g('pi'),PDE=g('pd');
+PIE.addEventListener('input',()=>{renderPtyDrop(PIE.value.trim().toLowerCase());PDE.classList.add('on');});
+PIE.addEventListener('focus',()=>{renderPtyDrop(PIE.value.trim().toLowerCase());PDE.classList.add('on');});
+document.addEventListener('click',e=>{if(!e.target.closest('.pw'))PDE.classList.remove('on');});
+function renderPtyDrop(q){
+  const list=g('pdl'),nb=g('pnw');
+  const m=q?parties.filter(p=>p.name.toLowerCase().includes(q)):parties.slice(0,8);
+  // Use array index into `parties` — avoids any quoting issues in onclick attribute
+  list.innerHTML=m.slice(0,8).map(p=>{
+    const idx=parties.indexOf(p);
+    return `<div class="po" onclick="selPtyIdx(${idx})"><span>${esc(p.name)}</span>${p.phone?`<span class="pos">${esc(p.phone)}</span>`:''}</div>`;
+  }).join('');
+  const ex=parties.some(p=>p.name.toLowerCase()===q);
+  if(q&&!ex){nb.style.display='flex'; g('pnwl').textContent='Create "'+PIE.value.trim()+'"';}
+  else nb.style.display='none';
+}
+// Select by index — safe, no string escaping in HTML attributes
+function selPtyIdx(idx){
+  const p=parties[idx]; if(!p)return;
+  selPty(p.id,p.name);
+}
+function selPty(id,name){aPty={id,name};PIE.value=name;PDE.classList.remove('on');renderCart();SI.focus();}
+function openPtyM(){g('pmm').classList.add('on');g('pmmi').value=PIE.value.trim();setTimeout(()=>g('pmmi').focus(),55);}
+function closePtyM(){g('pmm').classList.remove('on');}
+async function savePtyM(){const n=g('pmmi').value.trim();if(!n)return;const p=await addPtyToSB(n,'');selPty(p.id,p.name);closePtyM();toast('"'+n+'" created');}
+g('pmmi').addEventListener('keydown',e=>{if(e.key==='Enter')savePtyM();if(e.key==='Escape')closePtyM();});
+
+// ── SLANGS ────────────────────────────────────────────────────────────────
+async function loadSlangs(){
+  try{SLANGS=await sb.get('/rest/v1/biller_slangs?select=id,part_no,slang,added_by&order=id.desc&limit=200');}
+  catch(e){SLANGS=[];}
+  renderSlangs();
+}
+async function addSlang(){
+  const pn=g('sgpn').value.trim().toUpperCase();
+  const slang=g('sgnm').value.trim();
+  if(!pn||!slang){toast('Part number and name required');return;}
+  const idx=PARTS.findIndex(p=>p.part_no===pn);
+  if(idx<0){toast('Part not found: '+pn);return;}
+  try{
+    await sb.post('/rest/v1/biller_slangs',{part_no:pn,slang,added_by:'biller'});
+    await sb.patch('/rest/v1/parts_master?part_no=eq.'+pn,{b_parts_name:slang});
+    PARTS[idx].b_parts_name=slang; buildIdx();
+    SLANGS.unshift({id:Date.now(),part_no:pn,slang,added_by:'biller'});
+    renderSlangs(); g('sgpn').value=''; g('sgnm').value='';
+    g('sgh').className='sgh'; toast('Saved: '+pn+' → "'+slang+'"');
+  }catch(e){toast('Save failed');}
+}
+async function delSlang(id){
+  SLANGS=SLANGS.filter(s=>s.id!==id); renderSlangs();
+  try{await sb.del('/rest/v1/biller_slangs?id=eq.'+id);}catch(e){}
+}
+function renderSlangs(){
+  const el=g('sglr');
+  if(!SLANGS.length){el.innerHTML='<div style="padding:13px;text-align:center;color:var(--t3);font-size:12px">No slangs yet.</div>';return;}
+  el.innerHTML=
+    `<div class="sglr" style="background:var(--bg);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--t3)"><div>Part No</div><div>Local Name</div><div>Official</div><div></div></div>`+
+    SLANGS.slice(0,100).map(s=>{
+      const p=PARTS.find(x=>x.part_no===s.part_no);
+      return `<div class="sglr"><div class="sglpn">${s.part_no}</div><div style="font-weight:600">${esc(s.slang)}</div><div class="sglo">${esc(p?p.official_desc:'')}</div><button class="sgd" onclick="delSlang(${s.id})">✕</button></div>`;
+    }).join('');
+}
+function sgHint(){
+  const pn=g('sgpn').value.trim().toUpperCase(),h=g('sgh');
+  if(pn.length<4){h.className='sgh';return;}
+  const p=PARTS.find(x=>x.part_no===pn);
+  if(p){h.className='sgh on';h.innerHTML='✓ <strong>'+esc(p.official_desc||p.manual_desc)+'</strong>'+(p.b_parts_name?' · current: <em>'+esc(p.b_parts_name)+'</em>':'');}
+  else{h.className='sgh on';h.style.color='var(--rd)';h.textContent='Part not found';setTimeout(()=>h.style.color='',400);}
+}
+
+// ── DATA SYNC ─────────────────────────────────────────────────────────────
+function setupDZ(id,fn){
+  const dz=g(id);
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('ov');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('ov'));
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('ov');const f=e.dataTransfer.files[0];if(f)fn(f);});
+}
+setupDZ('dzst',f=>procStock(f)); setupDZ('dzbp',f=>procBparts(f));
+function hStock(e){if(e.target.files[0])procStock(e.target.files[0]);}
+function hBparts(e){if(e.target.files[0])procBparts(e.target.files[0]);}
+function lg2(el,msg,t='lh'){const e=g(el);e.innerHTML+=`<div class="${t}">${msg}</div>`;e.scrollTop=e.scrollHeight;}
+
+async function procStock(file){
+  // ── Closing Stock file parser ──────────────────────────────────────
+  // Format: rows 1-4 = junk (warehouse code, address, "Closing Stock as on…")
+  // Row 5 (or wherever found): Line Item | Part Number | Description |
+  //   Product Category | Stock on Hand | DLC | Stock Value | Bin 1 | Bin 2 | Bin 3
+  // Strategy: scan every row until we find one with "Part Number" cell,
+  // use that as the header row regardless of row index.
+  // ──────────────────────────────────────────────────────────────────
+  const log=id=>g(id);
+  g('stlg').innerHTML=''; g('stpr').style.display='block';
+  const pf=g('stpf'); pf.style.width='0%';
+  lg2('stlg','📁 '+file.name);
+
+  const buf=await file.arrayBuffer();
+  const wb=XLSX.read(buf,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  // Read as raw 2D array — no assumptions about headers
+  const rawA=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+
+  // Scan all rows (not just first 10) for the header row.
+  // Accept: cell contains "Part Number" (case-insensitive, any column)
+  let hRow=-1;
+  for(let i=0;i<rawA.length;i++){
+    if(rawA[i].some(c=>String(c).trim().toLowerCase()==='part number')){
+      hRow=i; break;
+    }
+  }
+  // Fallback: looser match in case of slight variation
+  if(hRow<0){
+    for(let i=0;i<rawA.length;i++){
+      if(rawA[i].some(c=>String(c).toLowerCase().includes('part number'))){
+        hRow=i; break;
+      }
+    }
+  }
+
+  if(hRow<0){
+    lg2('stlg','❌ Could not find "Part Number" header row in this file.','le');
+    lg2('stlg','ℹ Expected columns: Part Number, Stock on Hand, DLC, Bin 1','le');
+    return;
+  }
+
+  lg2('stlg','ℹ Header found at row '+(hRow+1)+' — skipped '+(hRow)+' metadata row(s)');
+
+  // Build header→colIndex map (exact column names from the spec)
+  const hdrs=rawA[hRow].map(c=>String(c).trim());
+  const ci=name=>{
+    // Find column index by exact name, then by includes fallback
+    let idx=hdrs.findIndex(h=>h.toLowerCase()===name.toLowerCase());
+    if(idx<0) idx=hdrs.findIndex(h=>h.toLowerCase().includes(name.toLowerCase()));
+    return idx;
+  };
+
+  const colPN   = ci('Part Number');
+  const colSTK  = ci('Stock on Hand');
+  const colDLC  = ci('DLC');
+  const colBIN1 = ci('Bin 1');
+
+  if(colPN<0){
+    lg2('stlg','❌ "Part Number" column not found in header row.','le');
+    return;
+  }
+  lg2('stlg',
+    'ℹ Columns → PN:'+colPN+' Stock:'+colSTK+' DLC:'+colDLC+' Bin1:'+colBIN1
+  );
+
+  const sf=v=>{
+    try{return parseFloat(String(v||0).replace(/,/g,'').replace(/--/g,'0').trim())||0;}
+    catch{return 0;}
+  };
+
+  const recs=[];
+  let skipped=0;
+  for(let i=hRow+1;i<rawA.length;i++){
+    const r=rawA[i];
+    const pn=String(r[colPN]||'').trim();
+    // Skip blank rows, sub-total rows, junk
+    if(!pn||pn.toLowerCase()==='nan'||pn.toLowerCase()==='part number') continue;
+    // Skip rows that look like summary lines (start with non-alphanumeric)
+    if(!/^[A-Za-z0-9]/.test(pn)){skipped++;continue;}
+
+    const stk = colSTK>=0 ? Math.round(sf(r[colSTK])) : 0;
+    const dlc = colDLC>=0 ? Math.round(sf(r[colDLC])*100)/100 : 0;
+    let bin1  = colBIN1>=0 ? String(r[colBIN1]||'').trim() : '';
+    if(bin1==='nan'||bin1==='--') bin1='';
+
+    recs.push({part_no:pn, stock_qty:stk, dlc, bin1});
+  }
+
+  lg2('stlg','✅ Parsed '+recs.length+' parts'+(skipped?' ('+skipped+' rows skipped)':''),'lg');
+  pf.style.width='20%';
+
+  // Upsert to Supabase in batches of 500
+  let done=0, errors=0;
+  for(let i=0;i<recs.length;i+=500){
+    const batch=recs.slice(i,i+500);
+    try{
+      // PATCH with ?part_no=in.(...) doesn't work for bulk; use POST with upsert
+      await fetch(SB+'/rest/v1/parts_master',{
+        method:'POST',
+        headers:{...hdr(),Prefer:'resolution=merge-duplicates,return=minimal'},
+        body:JSON.stringify(batch)
+      });
+    }catch(e){errors++;lg2('stlg','⚠ batch '+(i/500+1)+' err','le');}
+    done+=batch.length;
+    pf.style.width=Math.round(20+75*(done/recs.length))+'%';
+  }
+
+  // Update in-memory PARTS array so search reflects new stock immediately
+  const map=Object.fromEntries(recs.map(r=>[r.part_no,r]));
+  let updated=0;
+  PARTS.forEach(p=>{
+    if(map[p.part_no]){
+      p.stock_qty=map[p.part_no].stock_qty;
+      p.dlc=map[p.part_no].dlc;
+      p.bin1=map[p.part_no].bin1;
+      updated++;
+    }
+  });
+
+  pf.style.width='100%';
+  if(errors){
+    lg2('stlg','⚠ Done with '+errors+' batch error(s). '+updated+' local parts updated.','le');
+  } else {
+    lg2('stlg','🎉 Synced '+recs.length+' parts · '+updated+' matched in memory','lg');
+  }
+  toast('Stock synced · '+recs.length+' parts');
+}
+
+async function procBparts(file){
+  g('bplg').innerHTML=''; g('bppr').style.display='block';
+  const pf=g('bppf'); pf.style.width='0%';
+  lg2('bplg','📁 '+file.name);
+  const buf=await file.arrayBuffer();
+  const wb=XLSX.read(buf,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rawA=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  // B_PARTS layout: col A=SR NO, col B=ALTERNATE(part no), col C=DISCRIPTION(short name)
+  // Find header row
+  let hRow=0;
+  for(let i=0;i<Math.min(rawA.length,5);i++)
+    if(rawA[i].some(c=>String(c).toUpperCase().includes('ALTERN')||String(c).toUpperCase().includes('PART'))){hRow=i;break;}
+  lg2('bplg','ℹ Using col B=Part No, col C=Local Name (rows after row '+(hRow+1)+')');
+  const recs=[];
+  for(let i=hRow+1;i<rawA.length;i++){
+    const r=rawA[i];
+    const pn=String(r[1]||'').trim().toUpperCase();   // col B
+    const name=String(r[2]||'').trim();               // col C
+    if(!pn||!name||pn==='NAN'||name==='NAN')continue;
+    if(!/^[A-Z0-9\-]+$/.test(pn))continue;
+    recs.push({part_no:pn,local_name:name,added_by:'upload'});
+  }
+  lg2('bplg','✅ '+recs.length+' records parsed','lg'); pf.style.width='20%';
+  let done=0;
+  for(let i=0;i<recs.length;i+=500){
+    try{await sb.post('/rest/v1/b_parts',recs.slice(i,i+500),'resolution=merge-duplicates,return=minimal');}
+    catch(e){lg2('bplg','⚠ batch err','le');}
+    done+=Math.min(500,recs.length-i); pf.style.width=Math.round(20+55*(done/recs.length))+'%';
+  }
+  // Update parts_master.b_parts_name
+  const patches=recs.map(r=>({part_no:r.part_no,b_parts_name:r.local_name}));
+  for(let i=0;i<patches.length;i+=500){
+    try{await sb.patch('/rest/v1/parts_master',patches.slice(i,i+500));}catch(e){}
+    pf.style.width=Math.round(75+20*(Math.min(i+500,patches.length)/patches.length))+'%';
+  }
+  const map={}; recs.forEach(r=>map[r.part_no]=r.local_name);
+  let upd=0; PARTS.forEach(p=>{if(map[p.part_no]){p.b_parts_name=map[p.part_no];upd++;}});
+  buildIdx(); pf.style.width='100%';
+  lg2('bplg','🎉 '+upd+' parts updated · index rebuilt','lg');
+  toast('B_parts synced · '+upd+' parts');
+}
+
+async function testConn(){
+  const el=g('cst'); el.className='stpl sp-id'; el.innerHTML='<div class="spd"></div>Testing…';
+  try{const r=await fetch(SB+'/rest/v1/billing_parties?select=id&limit=1',{headers:hdr()});
+    if(r.ok){setSt('ok','Connected');toast('✓ Connected');}else throw new Error('HTTP '+r.status);}
+  catch(e){setSt('er',String(e).slice(0,40));}
+}
+function setSt(t,m){const el=g('cst');el.className='stpl sp-'+t;el.innerHTML=`<div class="spd"></div>${m}`;}
+async function reloadApp(){g('ld').style.display='flex';g('app').style.display='none';PARTS=[];PFX={};WIDX={};await boot();}
+
+// ── ORDERS HISTORY ─────────────────────────────────────────────────────────
+let ordersCache=[];
+
+async function loadOrders(){
+  const el=g('ord-list');
+  if(!el)return;
+  el.innerHTML='<div style="padding:32px;text-align:center;color:var(--t3);font-size:12px">Loading…</div>';
+  try{
+    const orders=await sb.get('/rest/v1/orders?select=*&order=created_at.desc&limit=100');
+    ordersCache=orders||[];
+    g('ord-count').textContent=ordersCache.length+' orders';
+    renderOrders();
+  }catch(e){
+    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--rd);font-size:12px">Failed to load: '+esc(String(e))+'</div>';
+  }
+}
+
+function renderOrders(){
+  const el=g('ord-list');
+  if(!ordersCache.length){
+    el.innerHTML='<div style="padding:44px;text-align:center;color:var(--t3);font-size:13px">No orders yet.</div>';
+    return;
+  }
+  el.innerHTML=ordersCache.map(ord=>{
+    const stCls=ord.status==='confirmed'?'ost-confirmed':ord.status==='partial'?'ost-partial':'ost-pending';
+    const stLbl=ord.status==='confirmed'?'✓ Confirmed':ord.status==='partial'?'⚠ Partial':'⏳ Pending';
+    const dt=ord.created_at?new Date(ord.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    const total=parseFloat(ord.total||0).toLocaleString('en-IN',{maximumFractionDigits:0});
+    return `<div class="ord-card" id="ocard-${ord.id}" onclick="toggleOrdCard('${ord.id}')">
+      <div class="ord-hd">
+        <span class="ord-no">${ord.order_number||ord.id.slice(-8).toUpperCase()}</span>
+        <span class="ord-pty">${esc(ord.party_name||'—')}</span>
+        <span class="ord-dt">${dt}</span>
+        <span class="ord-st ${stCls}">${stLbl}</span>
+      </div>
+      <div class="ord-meta">
+        <span>${ord.item_count||'?'} items</span>
+        <span>₹${total}</span>
+      </div>
+      <div class="ord-exp" id="oexp-${ord.id}">
+        <div style="text-align:center;color:var(--t3);font-size:11px;padding:8px">Loading items…</div>
+        <div class="exp-acts">
+          <button class="bsm2" onclick="event.stopPropagation();expOrdMarg('${ord.id}')">Marg CSV</button>
+          <button class="bsm2" onclick="event.stopPropagation();expOrdDMS('${ord.id}')">Hero DMS</button>
+          <button class="bsm2 bsm2-del" onclick="event.stopPropagation();delOrder('${ord.id}','${ord.order_number||ord.id.slice(-8)}','${ord.status}')">🗑 Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleOrdCard(id){
+  const card=g('ocard-'+id);
+  const exp=g('oexp-'+id);
+  if(!card||!exp)return;
+  card.classList.toggle('open');
+  if(card.classList.contains('open')&&exp.querySelector('div[style*="Loading"]')){
+    try{
+      const items=await sb.get(`/rest/v1/order_items?order_id=eq.${id}&order=bin.asc`);
+      let html=`<table class="ord-tbl"><thead><tr>
+        <th>Bin</th><th>Part No</th><th>Description</th>
+        <th style="text-align:center">Ordered</th><th style="text-align:center">Picked</th>
+        <th style="text-align:right">Rate</th><th style="text-align:right">Amount</th>
+        <th>Status</th></tr></thead><tbody>`;
+      for(const it of (items||[])){
+        const miss=it.status==='miss';
+        html+=`<tr${miss?' class="miss-row"':''}>
+          <td>${esc(it.bin||'—')}</td>
+          <td style="font-family:var(--m);font-size:10px;font-weight:600">${esc(it.part_no)}</td>
+          <td>${esc(it.display_name||'')}</td>
+          <td style="text-align:center">${it.qty_ordered}</td>
+          <td style="text-align:center;font-weight:700">${it.qty_picked??it.qty_ordered}</td>
+          <td style="text-align:right;font-size:11px;color:var(--t3)">₹${parseFloat(it.rate||0).toFixed(2)}</td>
+          <td style="text-align:right;font-weight:700">₹${parseFloat(it.amount||0).toLocaleString('en-IN',{maximumFractionDigits:0})}</td>
+          <td><span class="pk-status ${miss?'ps-miss':it.status==='part'?'ps-part':'ps-found'}" style="pointer-events:none">${miss?'✕ Not Found':it.status==='part'?'⚠ Partial':'✓ Found'}</span></td>
+        </tr>`;
+      }
+      html+='</tbody></table>';
+      exp.insertAdjacentHTML('afterbegin',html);
+      exp.querySelector('div[style*="Loading"]')?.remove();
+    }catch(e){
+      exp.insertAdjacentHTML('afterbegin',`<div style="color:var(--rd);padding:8px;font-size:11px">Failed: ${esc(String(e))}</div>`);
+      exp.querySelector('div[style*="Loading"]')?.remove();
+    }
+  }
+}
+
+async function delOrder(id, ordNo, status){
+  const label = ordNo||id.slice(-8).toUpperCase();
+  const warn  = status!=='pending'
+    ? '\n\n⚠ This order is "'+status+'" — deleting it cannot be undone.' : '';
+  if(!confirm('Delete order '+label+'?'+warn+'\n\nAll line items will also be deleted.'))return;
+  try{
+    await sb.del('/rest/v1/order_items?order_id=eq.'+id);
+    await sb.del('/rest/v1/orders?id=eq.'+id);
+    ordersCache=ordersCache.filter(o=>o.id!==id);
+    renderOrders();
+    toast('🗑 Order '+label+' deleted');
+  }catch(e){toast('Delete failed: '+String(e).slice(0,40));}
+}
+
+// Export a single order as Marg CSV
+async function expOrdMarg(id){
+  const ord=ordersCache.find(o=>o.id===id);
+  if(!ord)return;
+  try{
+    const rows=await sb.get(`/rest/v1/order_items?order_id=eq.${id}&status=neq.miss`);
+    if(!rows||!rows.length){toast('No items to export');return;}
+    const today=new Date().toLocaleDateString('en-GB').split('/').reverse().join('-');
+    // Enrich with in-memory HSN + gst_rate
+    const items=rows.map(it=>{
+      const p=PARTS.find(x=>x.part_no===it.part_no)||{};
+      return {
+        pn:        it.part_no,
+        official:  it.official_desc||it.display_name||'',
+        display:   it.display_name||'',
+        mrp:       parseFloat(it.mrp||p.mrp||0),
+        qty:       parseInt(it.qty_picked??it.qty_ordered)||0,
+        rate:      parseFloat(it.rate||0),
+        hsn:       p.hsn_code||'',
+        gst_rate:  18,
+      };
+    });
+    const grand=calcGrandTotal(items);
+    const csv=[margHeader(),...items.map(c=>margRow(ord.party_name,c,grand,today))].join('\n');
+    dl('Marg_'+ord.order_number+'_'+esc2(ord.party_name)+'.csv',csv,'text/csv');
+    toast('Marg CSV — '+items.length+' lines, ₹'+grand.toLocaleString('en-IN'));
+  }catch(e){toast('Export failed: '+String(e).slice(0,40));}
+}
+
+async function expOrdDMS(id){
+  // Hero DMS Order CSV — exact 3-column format matching Parts_Sales_Order_Template_1.csv
+  const ord=ordersCache.find(o=>o.id===id);
+  if(!ord)return;
+  try{
+    const items=await sb.get(`/rest/v1/order_items?order_id=eq.${id}&status=neq.miss`);
+    if(!items||!items.length){toast('No items to export');return;}
+    const rows=items.map((it,i)=>`${i+1},${it.part_no},${it.qty_picked??it.qty_ordered}`);
+    const csv=['LINE #,Part #,Order Qty',...rows].join('\n');
+    dl('Parts_Sales_Order_'+ord.order_number+'.csv',csv,'text/csv');
+    toast('Hero DMS Order CSV — '+items.length+' parts');
+  }catch(e){toast('Export failed: '+String(e).slice(0,40));}
+}
+
+// Export ALL confirmed orders as a single Marg CSV (nightly import)
+// Exact 64-col Marg format — one file, all parties, all orders
+async function expAllMarg(){
+  const confirmed=ordersCache.filter(o=>o.status==='confirmed'||o.status==='partial');
+  if(!confirmed.length){toast('No confirmed orders to export');return;}
+  try{
+    const allRows=[margHeader()];
+    let totalOrders=0, totalLines=0;
+    for(const ord of confirmed){
+      const rows=await sb.get(`/rest/v1/order_items?order_id=eq.${ord.id}&status=neq.miss`);
+      if(!rows||!rows.length) continue;
+      const today=(ord.created_at||new Date().toISOString()).slice(0,10);
+      const items=rows.map(it=>{
+        const p=PARTS.find(x=>x.part_no===it.part_no)||{};
+        return {
+          pn:       it.part_no,
+          official: it.official_desc||it.display_name||'',
+          display:  it.display_name||'',
+          mrp:      parseFloat(it.mrp||p.mrp||0),
+          qty:      parseInt(it.qty_picked??it.qty_ordered)||0,
+          rate:     parseFloat(it.rate||0),
+          hsn:      p.hsn_code||'',
+          gst_rate: 18,
+        };
+      });
+      const grand=calcGrandTotal(items);
+      items.forEach(c=>allRows.push(margRow(ord.party_name, c, grand, today)));
+      totalOrders++; totalLines+=items.length;
+    }
+    const today=new Date().toISOString().slice(0,10);
+    dl('Marg_AllOrders_'+today+'.csv', allRows.join('\n'), 'text/csv');
+    toast('Marg ERP — '+totalOrders+' orders, '+totalLines+' lines exported');
+  }catch(e){toast('Export failed: '+String(e).slice(0,40));}
+}
+
+function esc2(s){return (s||'').replace(/"/g,'""');}  // CSV-safe quote escape
+
+// ── ROUTING (updated) ──────────────────────────────────────────────────────
+function go(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  const tab=g('t'+name); if(tab)tab.classList.add('on');
+  const pan=g('p'+name); if(pan)pan.classList.add('on');
+  if(name==='pick')renderPick();
+  if(name==='sync')renderPtyMgr();
+  if(name==='slangs')renderSlangs();
+  if(name==='ord')loadOrders();
+  if(name==='billing')setTimeout(()=>SI.focus(),55);
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
+function g(id){return document.getElementById(id);}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+let tT;
+function toast(msg){const el=g('toast');el.textContent=msg;el.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('on'),2600);}
+</script>
+</body>
+</html>
