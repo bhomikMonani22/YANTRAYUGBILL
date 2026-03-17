@@ -1377,8 +1377,8 @@ async function saveOrder(){
     cart.forEach(c=>pickStatus[c.pn]='found');
 
     showBanner('saved','Saved',ordNo);
-    g('pk-ord-badge').textContent='Order '+ordNo.slice(-10);
-    g('bconf').disabled=false;
+    const badge=g('pk-ord-badge'); if(badge) badge.textContent='Order '+ordNo.slice(-10);
+    const bconf=g('bconf'); if(bconf) bconf.disabled=false;
     updateConfirmBar();
     toast('Order saved — verify in Pick List');
     go('pick');   // ← automatically go to pick list for verification
@@ -1461,6 +1461,7 @@ function updateConfirmBar(){
   if(!bar)return;
   const stat=g('pk-ord-status');
   const btn=g('bconf');
+  if(!stat)return;
   if(!currentOrderId){
     stat.innerHTML='Press <kbd>Ctrl S</kbd> to save order before confirming';
     if(btn)btn.disabled=true;
@@ -1512,7 +1513,7 @@ async function confirmOrder(){
     // Reset for next order
     cart=[];pickStatus={};currentOrderId=null;clearDirty();
     renderCart();
-    g('pk-ord-badge').textContent='';
+    const badge2=g('pk-ord-badge'); if(badge2) badge2.textContent='';
     go('billing');
     loadOrders();
   }catch(e){
