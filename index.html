@@ -206,7 +206,7 @@ kbd{background:var(--bg);border:1px solid var(--sep);border-bottom:2px solid rgb
   text-align:center;transition:color .12s}.bcl:hover{color:var(--rd)}
 
 /* ═══ PICK LIST ═══ */
-#pp{flex-direction:column;background:var(--sf)}
+#pp{flex-direction:column;background:var(--sf);overflow:hidden}
 #pkb{flex-shrink:0;padding:8px 16px;display:flex;align-items:center;gap:10px;
   background:var(--gl);backdrop-filter:var(--gb);-webkit-backdrop-filter:var(--gb);
   border-bottom:1px solid var(--sep)}
@@ -222,8 +222,8 @@ kbd{background:var(--bg);border:1px solid var(--sep);border-bottom:2px solid rgb
   padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:5px;
   box-shadow:0 2px 8px rgba(0,122,255,.22);transition:opacity .12s}
 .bprt:hover{opacity:.88}
-#pks{flex:1;overflow-y:auto;padding:12px 16px}
-#pkt2{width:100%;border-collapse:collapse;font-size:12.5px}
+#pks{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 10px}
+#pkt2{width:100%;min-width:700px;border-collapse:collapse;font-size:12px}
 #pkt2 thead th{padding:5px 8px;text-align:left;font-size:9px;font-weight:700;
   text-transform:uppercase;letter-spacing:.4px;color:var(--t3);
   background:var(--bg);border-bottom:1.5px solid var(--sep);
@@ -419,9 +419,10 @@ kbd{background:var(--bg);border:1px solid var(--sep);border-bottom:2px solid rgb
 .ps-found{background:var(--ok-b);color:var(--ok-f)}
 .ps-miss{background:var(--no-b);color:var(--no-f)}
 .ps-part{background:var(--lo-b);color:var(--lo-f)}
-#pk-confirm-bar{flex-shrink:0;padding:9px 16px;border-top:2px solid var(--sep);
-  display:flex;align-items:center;gap:9px;background:var(--sf)}
-#pk-ord-status{font-size:11.5px;color:var(--t3)}
+#pk-confirm-bar{flex-shrink:0;padding:7px 12px;border-top:2px solid var(--sep);
+  display:flex;align-items:center;gap:7px;background:var(--sf);flex-wrap:wrap}
+#pk-ord-status{font-size:10.5px;color:var(--t3);flex:1;min-width:0;
+  white-space:normal;line-height:1.35}
 .bconf{background:var(--gn);border:none;border-radius:var(--r);font-family:var(--f);
   font-size:13px;font-weight:600;color:#fff;padding:8px 18px;cursor:pointer;
   display:flex;align-items:center;gap:6px;margin-left:auto;
@@ -708,14 +709,14 @@ td.miss-cell{opacity:.45}
     </div>
     <table id="pkt2" style="display:none">
       <thead><tr>
-        <th style="width:76px">Bin</th>
-        <th style="width:104px">Part No</th>
+        <th style="width:68px">Bin</th>
+        <th style="width:96px">Part No</th>
         <th>Description</th>
-        <th style="width:62px;text-align:center">Qty</th>
-        <th style="width:78px;text-align:right">Rate ₹</th>
-        <th style="width:78px;text-align:right">Amount</th>
-        <th style="width:82px;text-align:center">Found?</th>
-        <th style="width:22px"></th>
+        <th style="width:54px;text-align:center">Qty</th>
+        <th style="width:68px;text-align:right">Rate</th>
+        <th style="width:68px;text-align:right">Amt</th>
+        <th style="width:130px;text-align:center">Found?</th>
+        <th style="width:20px"></th>
       </tr></thead>
       <tbody id="pkbd"></tbody>
     </table>
@@ -727,10 +728,10 @@ td.miss-cell{opacity:.45}
     </div>
   </div>
   <div id="pk-confirm-bar">
-    <div id="pk-ord-status" style="font-size:11.5px;color:var(--t3)">
-      Save order first with <kbd>Ctrl S</kbd>
+    <div id="pk-ord-status" style="font-size:10.5px;color:var(--t3);flex:1;min-width:0">
+      Press <kbd>Ctrl S</kbd> to save
     </div>
-    <div style="display:flex;gap:7px;margin-left:auto">
+    <div style="display:flex;gap:6px;flex-shrink:0">
       <button class="bsc" onclick="expMarg()" style="font-size:11.5px;padding:5px 11px">Marg CSV</button>
       <button class="bsc" onclick="expDMS()" style="font-size:11.5px;padding:5px 11px">Hero DMS</button>
       <button class="bconf" id="bconf" onclick="confirmOrder()" disabled>
