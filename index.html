@@ -222,7 +222,7 @@ kbd{background:var(--bg);border:1px solid var(--sep);border-bottom:2px solid rgb
   padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:5px;
   box-shadow:0 2px 8px rgba(0,122,255,.22);transition:opacity .12s}
 .bprt:hover{opacity:.88}
-#pks{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 10px}
+#pks{flex:1;overflow-y:auto;overflow-x:auto;padding:8px 10px}
 #pkt2{width:100%;min-width:700px;border-collapse:collapse;font-size:12px}
 #pkt2 thead th{padding:5px 8px;text-align:left;font-size:9px;font-weight:700;
   text-transform:uppercase;letter-spacing:.4px;color:var(--t3);
@@ -412,9 +412,9 @@ kbd{background:var(--bg);border:1px solid var(--sep);border-bottom:2px solid rgb
 }
 
 /* ═══ PICK LIST ENHANCED ═══ */
-.pk-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;
-  font-weight:700;padding:2px 8px;border-radius:var(--pill);cursor:pointer;
-  border:none;font-family:var(--f);transition:opacity .12s}
+.pk-status{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;
+  font-weight:700;padding:2px 6px;border-radius:var(--pill);cursor:pointer;
+  border:none;font-family:var(--f);transition:opacity .12s;white-space:nowrap}
 .pk-status:hover{opacity:.75}
 .ps-found{background:var(--ok-b);color:var(--ok-f)}
 .ps-miss{background:var(--no-b);color:var(--no-f)}
@@ -715,11 +715,12 @@ td.miss-cell{opacity:.45}
         <th style="width:54px;text-align:center">Qty</th>
         <th style="width:68px;text-align:right">Rate</th>
         <th style="width:68px;text-align:right">Amt</th>
-        <th style="width:130px;text-align:center">Found?</th>
+        <th style="width:72px;text-align:center">Found?</th>
         <th style="width:20px"></th>
       </tr></thead>
       <tbody id="pkbd"></tbody>
     </table>
+    </div><!-- /scroll wrapper -->
   </div>
   <div id="pkf" style="flex-shrink:0;padding:9px 16px;border-top:1px solid var(--sep);display:flex;align-items:center;gap:10px;background:var(--sf)">
     <div>
@@ -1426,7 +1427,7 @@ function renderPick(){
       <td style="text-align:center"><input class="edt" type="number" value="${item.qty}" min="0" onchange="pkEd(${oi},'qty',this.value)" onfocus="this.select()" ${isMiss?'disabled':''}></td>
       <td style="text-align:right"><input class="edt" type="number" step="0.01" value="${item.rate.toFixed(2)}" onchange="pkEd(${oi},'rate',this.value)" onfocus="this.select()" ${isMiss?'disabled':''}></td>
       <td style="text-align:right"><div class="ptam" id="pa${oi}">₹${isMiss?'0':amt.toLocaleString('en-IN',{maximumFractionDigits:0})}</div></td>
-      <td style="text-align:center;white-space:nowrap">${btnFound} ${btnMiss}</td>
+      <td style="text-align:center"><div style="display:flex;flex-direction:column;gap:3px;align-items:center">${btnFound}${btnMiss}</div></td>
       <td><button class="db" onclick="rmI(${oi});renderPick()">✕</button></td>
     </tr>`;
   }).join('');
