@@ -1809,14 +1809,15 @@ function expMarg(){
   toast('Marg ERP CSV — '+items.length+' lines, ₹'+grand.toLocaleString('en-IN'));
 }
 
-// ── HERO DMS ORDER CSV (simplified 3-col template: LINE #, Part #, Order Qty) ──
-// This matches Parts_Sales_Order_Template_1.csv exactly
+// ── HERO DMS ORDER CSV — matches Parts_Sales_Order_Template.csv exactly ──
+// Columns: Serial #, Part Number, Order Qty
+// Filename: Parts_Sales_Order_YYYYMMDD_HHMM.csv
 function expDMS(){
   if(!chkP()||!cart.length)return;
   const rows = cart.map((c,i)=>`${i+1},${c.pn},${c.qty}`);
-  const csv  = ['LINE #,Part #,Order Qty', ...rows].join('\n');
-  dl('Parts_Sales_Order_'+ts()+'.csv', csv, 'text/csv');
-  toast('Hero DMS Order CSV — '+cart.length+' parts');
+  const csv  = ['Serial #,Part Number,Order Qty', ...rows].join('\n');
+  dl('Parts Sales Order Template.csv', csv, 'text/csv');
+  toast('Hero DMS CSV — '+cart.length+' parts');
 }
 function dl(n,d,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([d],{type:m}));a.download=n;a.click();}
 function ts(){return new Date().toISOString().replace(/[:.]/g,'-').slice(0,16);}
@@ -2247,16 +2248,17 @@ async function expOrdMarg(id){
 }
 
 async function expOrdDMS(id){
-  // Hero DMS Order CSV — exact 3-column format matching Parts_Sales_Order_Template_1.csv
+  // Hero DMS Order CSV — matches Parts_Sales_Order_Template.csv exactly
+  // Columns: Serial #, Part Number, Order Qty
   const ord=ordersCache.find(o=>o.id===id);
   if(!ord)return;
   try{
     const items=await sb.get(`/rest/v1/order_items?order_id=eq.${id}&status=neq.miss`);
     if(!items||!items.length){toast('No items to export');return;}
     const rows=items.map((it,i)=>`${i+1},${it.part_no},${it.qty_picked??it.qty_ordered}`);
-    const csv=['LINE #,Part #,Order Qty',...rows].join('\n');
-    dl('Parts_Sales_Order_'+ord.order_number+'.csv',csv,'text/csv');
-    toast('Hero DMS Order CSV — '+items.length+' parts');
+    const csv=['Serial #,Part Number,Order Qty',...rows].join('\n');
+    dl('Parts Sales Order Template.csv',csv,'text/csv');
+    toast('Hero DMS CSV — '+items.length+' parts');
   }catch(e){toast('Export failed: '+String(e).slice(0,40));}
 }
 
